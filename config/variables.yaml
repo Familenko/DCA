@@ -1,0 +1,22 @@
+freq_multiplier:
+  W-MON: 52
+  WOM-1MON: 12
+  D: 365
+
+default_params:
+  buy_amount: 10.0
+  freq: "W-MON"
+  fee: 0.01
+  minimum_profit: 1.1
+  cooldown_days: 30
+  cooldown_wait: 30
+  manual_sell_fraction: null
+  auto_sell_fraction: 0.5
+  enable_sell: true
+  enable_model: true
+  threshold_invest_years: 3
+  threshold_model_sell: 0.5
+  threshold_ma200_sell: 1.0
+  threshold_zscore_sell: 3.0
+
+banking_rate: 0.02
