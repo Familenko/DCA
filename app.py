@@ -70,6 +70,9 @@ class Configuration:
     auto_sell_fraction: float
     enable_sell: bool
     enable_model: bool
+    enable_ma200: bool
+    enable_zscore: bool
+    enable_portfolio: bool
     threshold_invest_years: int
     threshold_model_sell: float
     threshold_ma200_sell: float
@@ -160,14 +163,17 @@ class BacktestDCA:
             prices_to_date = self.config.prices.loc[:date]
 
             ma200_sell = sell_ma200(prices=prices_to_date, 
-                                    threshold=self.config.threshold_ma200_sell)
+                                    threshold=self.config.threshold_ma200_sell
+                                    ) if self.config.enable_ma200 else (False, "MA200: N/A")
             
             portfolio_sell = sell_portfolio(portfolio_current=self.state.portfolio,
                                             warmup_invest=self.config.warmup_invest,
-                                            invest_years=self.config.threshold_invest_years)
+                                            invest_years=self.config.threshold_invest_years
+                                            ) if self.config.enable_portfolio else (False, "Portfolio: N/A")
             
             zscore_sell = sell_zscore(prices=prices_to_date, 
-                                      threshold=self.config.threshold_zscore_sell)
+                                      threshold=self.config.threshold_zscore_sell
+                                      ) if self.config.enable_zscore else (False, "Z-score: N/A")
 
             model_sell = sell_model(prices=prices_to_date,
                                     threshold=self.config.threshold_model_sell
