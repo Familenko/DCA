@@ -162,22 +162,26 @@ class BacktestDCA:
         else:
             prices_to_date = self.config.prices.loc[:date]
 
-            ma200_sell = sell_ma200(prices=prices_to_date, 
-                                    threshold=self.config.threshold_ma200_sell
-                                    ) if self.config.enable_ma200 else (False, "MA200: N/A")
+            ma200_sell = sell_ma200(
+                prices=prices_to_date, 
+                threshold=self.config.threshold_ma200_sell
+                ) if self.config.enable_ma200 else (False, "MA200: N/A")
             
-            portfolio_sell = sell_portfolio(portfolio_current=self.state.portfolio,
-                                            warmup_invest=self.config.warmup_invest,
-                                            invest_years=self.config.threshold_invest_years
-                                            ) if self.config.enable_portfolio else (False, "Portfolio: N/A")
+            portfolio_sell = sell_portfolio(
+                portfolio_current=self.state.portfolio,
+                warmup_invest=self.config.warmup_invest,
+                invest_years=self.config.threshold_invest_years
+                ) if self.config.enable_portfolio else (False, "Portfolio: N/A")
             
-            zscore_sell = sell_zscore(prices=prices_to_date, 
-                                      threshold=self.config.threshold_zscore_sell
-                                      ) if self.config.enable_zscore else (False, "Z-score: N/A")
+            zscore_sell = sell_zscore(
+                prices=prices_to_date, 
+                threshold=self.config.threshold_zscore_sell
+                ) if self.config.enable_zscore else (False, "Z-score: N/A")
 
-            model_sell = sell_model(prices=prices_to_date,
-                                    threshold=self.config.threshold_model_sell
-                                    ) if self.config.enable_model else (False, "Model: N/A")
+            model_sell = sell_model(
+                prices=prices_to_date,
+                threshold=self.config.threshold_model_sell
+                ) if self.config.enable_model else (False, "Model: N/A")
 
             signals = [model_sell, ma200_sell, zscore_sell, portfolio_sell]
             signals = [(confirm, msg) for confirm, msg in signals if confirm]
