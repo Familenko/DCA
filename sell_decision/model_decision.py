@@ -63,7 +63,8 @@ def _build_features(prices: pd.Series) -> pd.DataFrame:
 
 
 def sell_model(prices: pd.Series,
-               threshold: float = 0.5) -> tuple[bool, str]:
+               threshold: float = 0.5,
+			   sell_fraction: float = 0.5) -> tuple[bool, str]:
 	"""
 		Продає частину портфелю пропорційно до ймовірності падіння ціни на основі моделі машинного навчання.
 
@@ -101,6 +102,6 @@ def sell_model(prices: pd.Series,
 	if proba.shape[1] == 2:
 		prob_downtrend = float(np.clip(proba[0, 1], 0.0, 1.0))
 		if prob_downtrend > threshold:
-			return True, f"Model: {prob_downtrend:.0%}"
+			return sell_fraction, f"Model: {prob_downtrend:.0%}"
 
-	return False, "Model: N/A"
+	return 0.0, "Model: N/A"

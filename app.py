@@ -8,7 +8,7 @@ import yaml
 from utils.mdd import max_drawdown
 from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
-from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_zscore
+from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_zscore, sell_rsi
 from sell_decision.model_decision import sell_model
 from utils.validation import validation
 
@@ -73,6 +73,7 @@ class Configuration:
     enable_ma200: bool
     enable_zscore: bool
     enable_portfolio: bool
+    enable_rsi: bool
     threshold_invest_years: int
     threshold_model_sell: float
     threshold_ma200_sell: float
@@ -159,36 +160,34 @@ class BacktestDCA:
             sell_fraction = self.config.manual_sell_fraction
             return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
         
-        else:
-            prices_to_date = self.config.prices.loc[:date]
+        ma200_sell = sell_ma200(
+            prices=self.config.prices.loc[:date]
+            ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
+        
+        portfolio_sell = sell_portfolio(
+            portfolio_current=self.state.portfolio,
+            warmup_invest=self.config.warmup_invest,
+            invest_years=self.config.threshold_invest_years
+        ) if self.config.enable_portfolio else (0.0, "Limit: N/A")
 
-            ma200_sell = sell_ma200(
-                prices=prices_to_date, 
-                threshold=self.config.threshold_ma200_sell
-                ) if self.config.enable_ma200 else (False, "MA200: N/A")
-            
-            portfolio_sell = sell_portfolio(
-                portfolio_current=self.state.portfolio,
-                warmup_invest=self.config.warmup_invest,
-                invest_years=self.config.threshold_invest_years
-                ) if self.config.enable_portfolio else (False, "Portfolio: N/A")
-            
-            zscore_sell = sell_zscore(
-                prices=prices_to_date, 
-                threshold=self.config.threshold_zscore_sell
-                ) if self.config.enable_zscore else (False, "Z-score: N/A")
+        zscore_sell = sell_zscore(
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_zscore_sell
+        ) if self.config.enable_zscore else (0.0, "Z-score: N/A")
 
-            model_sell = sell_model(
-                prices=prices_to_date,
-                threshold=self.config.threshold_model_sell
-                ) if self.config.enable_model else (False, "Model: N/A")
+        rsi_sell = sell_rsi(
+            prices=self.config.prices.loc[:date]
+        ) if self.config.enable_rsi else (0.0, "RSI: N/A")
 
-            signals = [model_sell, ma200_sell, zscore_sell, portfolio_sell]
-            signals = [(confirm, msg) for confirm, msg in signals if confirm]
-            confirm_lvl, sell_msg = next(iter(signals), (False, ""))
-            sell_fraction = self.config.auto_sell_fraction if confirm_lvl else 0.0
+        model_sell = sell_model(
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_model_sell
+        ) if self.config.enable_model else (0.0, "Model: N/A")
 
-            return sell_fraction, sell_msg
+        signals = sorted([ma200_sell, portfolio_sell, zscore_sell, rsi_sell, model_sell], key=lambda x: x[0])
+        sell_fraction, sell_msg = signals[-1]
+
+        return sell_fraction, sell_msg
 
     def run(self):
         for date, price in self.config.prices.items():
@@ -207,7 +206,7 @@ class BacktestDCA:
                 self.cooldown = self.config.cooldown_wait
 
                 sell_fraction, sell_msg = self.decide_sell(date=date)
-                if sell_fraction > 0:
+                if sell_fraction >= 0.1:
                     self.execute_sell(price=price, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     self.cooldown = self.config.cooldown_days
