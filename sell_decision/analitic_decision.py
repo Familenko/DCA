@@ -5,7 +5,7 @@ import ta
 
 def sell_portfolio(portfolio_current: int,
                     warmup_invest: int = 1000,
-                    invest_years: float = 4.0) -> tuple[float, str]:
+                    threshold: float = 3.0) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до перевищення ліміту інвестицій.
 
@@ -13,12 +13,11 @@ def sell_portfolio(portfolio_current: int,
     - prices: серія цін
     - portfolio_current: поточна вартість портфелю
     - warmup_invest: сума портфелю, яку ми вважаємо "оптимальною" після періоду розігріву
-    - invest_years: кількість років для визначення максимальної суми портфелю
+    - threshold: поріг для визначення перевищення ліміту інвестицій
     """
 
-    denominator = invest_years - 1
-    ratio = portfolio_current / warmup_invest
-    overvalue = (ratio - 1) / denominator
+    threshold_portfolio = warmup_invest * threshold
+    overvalue = (portfolio_current - threshold_portfolio) / threshold_portfolio
 
     if overvalue > 0:
         sell_fraction = min(overvalue, 0.5)
@@ -27,7 +26,8 @@ def sell_portfolio(portfolio_current: int,
     return 0.0, "Wait"
 
 
-def sell_ma200(prices: pd.Series) -> tuple[float, str]:
+def sell_ma200(prices: pd.Series,
+               threshold: float = 2.0) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до відхилення ціни від 200-денної MA.
 
@@ -38,7 +38,8 @@ def sell_ma200(prices: pd.Series) -> tuple[float, str]:
     ma200 = prices.rolling(200).mean()
     last_price = prices.iloc[-1]
     last_ma200 = ma200.iloc[-1]
-    overvalue = (last_price - last_ma200) / last_ma200
+    threshold_ma = last_ma200 * threshold
+    overvalue = (last_price - threshold_ma) / threshold_ma
 
     if overvalue > 0:
         sell_fraction = min(overvalue, 0.5)
@@ -68,7 +69,8 @@ def sell_zscore(prices: pd.Series,
     return 0.0, "Wait"
 
 
-def sell_rsi(prices: pd.Series) -> tuple[float, str]:
+def sell_rsi(prices: pd.Series,
+             threshold: float = 75.0) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до відхилення RSI від нейтральної зони 50
 
@@ -78,7 +80,7 @@ def sell_rsi(prices: pd.Series) -> tuple[float, str]:
 
     rsi = ta.momentum.RSIIndicator(close=prices).rsi()
     last_rsi = rsi.iloc[-1]
-    overvalue = (last_rsi - 50) / 100
+    overvalue = (last_rsi - threshold) / threshold
 
     if overvalue > 0:
         sell_fraction = min(overvalue, 0.5)

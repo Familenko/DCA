@@ -78,6 +78,7 @@ class Configuration:
     threshold_model_sell: float
     threshold_ma200_sell: float
     threshold_zscore_sell: float
+    threshold_rsi_sell: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -161,13 +162,14 @@ class BacktestDCA:
             return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
         
         ma200_sell = sell_ma200(
-            prices=self.config.prices.loc[:date]
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_ma200_sell
             ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
         
         portfolio_sell = sell_portfolio(
             portfolio_current=self.state.portfolio,
             warmup_invest=self.config.warmup_invest,
-            invest_years=self.config.threshold_invest_years
+            threshold=self.config.threshold_invest_years
         ) if self.config.enable_portfolio else (0.0, "Limit: N/A")
 
         zscore_sell = sell_zscore(
@@ -176,12 +178,14 @@ class BacktestDCA:
         ) if self.config.enable_zscore else (0.0, "Z-score: N/A")
 
         rsi_sell = sell_rsi(
-            prices=self.config.prices.loc[:date]
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_rsi_sell
         ) if self.config.enable_rsi else (0.0, "RSI: N/A")
 
         model_sell = sell_model(
             prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_model_sell
+            threshold=self.config.threshold_model_sell,
+            sell_fraction=self.config.auto_sell_fraction
         ) if self.config.enable_model else (0.0, "Model: N/A")
 
         signals = sorted([ma200_sell, portfolio_sell, zscore_sell, rsi_sell, model_sell], key=lambda x: x[0])
