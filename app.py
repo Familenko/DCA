@@ -210,7 +210,7 @@ class BacktestDCA:
                 self.cooldown = self.config.cooldown_wait
 
                 sell_fraction, sell_msg = self.decide_sell(date=date)
-                if sell_fraction >= 0.1:
+                if sell_fraction > 0:
                     self.execute_sell(price=price, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     self.cooldown = self.config.cooldown_days
