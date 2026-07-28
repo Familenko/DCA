@@ -5,7 +5,7 @@ import ta
 
 def sell_portfolio(portfolio_current: int,
                     warmup_invest: int = 1000,
-                    threshold: float = 3.0) -> tuple[float, str]:
+                    threshold: float = 4.0) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до перевищення ліміту інвестицій.
 
@@ -20,7 +20,7 @@ def sell_portfolio(portfolio_current: int,
     overvalue = (portfolio_current - threshold_portfolio) / threshold_portfolio
 
     if overvalue > 0:
-        sell_fraction = min(overvalue, 0.5)
+        sell_fraction = 1.0
         return sell_fraction, f"Limit: {int(portfolio_current)}$ [-{sell_fraction:.0%}]"
          
     return 0.0, "Wait"
@@ -42,8 +42,8 @@ def sell_ma200(prices: pd.Series,
     overvalue = (last_price - threshold_ma) / threshold_ma
 
     if overvalue > 0:
-        sell_fraction = min(overvalue, 0.5)
-        return sell_fraction, f"Bull: {overvalue:.0%} [-{sell_fraction:.0%}]"
+        sell_fraction = 0.5
+        return sell_fraction, f"MA200: {last_price:.2f} [-{sell_fraction:.0%}]"
 
     return 0.0, "Wait"
 
@@ -70,7 +70,7 @@ def sell_zscore(prices: pd.Series,
 
 
 def sell_rsi(prices: pd.Series,
-             threshold: float = 75.0) -> tuple[float, str]:
+             threshold: float = 50.0) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до відхилення RSI від нейтральної зони 50
 

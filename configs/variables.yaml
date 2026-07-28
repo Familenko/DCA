@@ -7,8 +7,8 @@ default_params:
   buy_amount: 10.0
   freq: "W-MON"
   fee: 0.01
-  minimum_profit: 1.5
-  cooldown_days: 30
+  minimum_profit: 2.0
+  cooldown_days: 90
   cooldown_wait: 30
   manual_sell_fraction: null
   auto_sell_fraction: 0.25
@@ -18,10 +18,10 @@ default_params:
   enable_zscore: true
   enable_portfolio: true
   enable_rsi: true
-  threshold_invest_years: 3.0
+  threshold_invest_years: 4.0
   threshold_model_sell: 0.5
-  threshold_ma200_sell: 1.5
+  threshold_ma200_sell: 2.0
   threshold_zscore_sell: 3.0
-  threshold_rsi_sell: 75.0
+  threshold_rsi_sell: 50.0
 
 banking_rate: 0.02
