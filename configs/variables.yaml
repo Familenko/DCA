@@ -21,7 +21,7 @@ default_params:
   threshold_invest_years: 4.0
   threshold_model_sell: 0.5
   threshold_ma200_sell: 2.0
-  threshold_zscore_sell: 3.0
-  threshold_rsi_sell: 60.0
+  threshold_zscore_sell: 1.5
+  threshold_rsi_sell: 75.0
 
 banking_rate: 0.02
