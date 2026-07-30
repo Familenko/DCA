@@ -190,7 +190,7 @@ class BacktestDCA:
             sell_fraction=self.config.auto_sell_fraction
         ) if self.config.enable_model else (0.0, "Model: N/A")
 
-        signals = sorted([ma200_sell, portfolio_sell, zscore_sell, rsi_sell, model_sell], key=lambda x: x[0])
+        signals = sorted([model_sell, ma200_sell, portfolio_sell, zscore_sell, rsi_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
         return sell_fraction, sell_msg
