@@ -17,9 +17,9 @@ def sell_portfolio(portfolio_current: int,
     """
 
     threshold_portfolio = warmup_invest * threshold
-    overvalue = (portfolio_current - threshold_portfolio) / threshold_portfolio
+    overvalue = portfolio_current > threshold_portfolio
 
-    if overvalue > 0:
+    if overvalue:
         sell_fraction = 1.0
         return sell_fraction, f"Limit: {int(portfolio_current)}$ [-{sell_fraction:.0%}]"
          
@@ -39,9 +39,9 @@ def sell_ma200(prices: pd.Series,
     last_price = prices.iloc[-1]
     last_ma200 = ma200.iloc[-1]
     threshold_ma = last_ma200 * threshold
-    overvalue = (last_price - threshold_ma) / threshold_ma
+    overvalue = last_price > threshold_ma
 
-    if overvalue > 0:
+    if overvalue:
         sell_fraction = 0.5
         return sell_fraction, f"MA200: {last_price:.2f} [-{sell_fraction:.0%}]"
 
@@ -60,17 +60,17 @@ def sell_zscore(prices: pd.Series,
     std = prices.rolling(k).std()
     zscore = (prices - ma) / std
     last_zscore = zscore.iloc[-1]
-    overvalue = (last_zscore - threshold) / threshold
+    overvalue = last_zscore > threshold
 
-    if overvalue > 0:
-        sell_fraction = min(overvalue, 0.5)
+    if overvalue:
+        sell_fraction = 0.25
         return sell_fraction, f"Z-score: {last_zscore:.2f} [-{sell_fraction:.0%}]"
 
     return 0.0, "Wait"
 
 
 def sell_rsi(prices: pd.Series,
-             threshold: float = 50.0) -> tuple[float, str]:
+             threshold: float = 75.0) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до відхилення RSI від нейтральної зони 50
 
@@ -80,10 +80,10 @@ def sell_rsi(prices: pd.Series,
 
     rsi = ta.momentum.RSIIndicator(close=prices).rsi()
     last_rsi = rsi.iloc[-1]
-    overvalue = (last_rsi - threshold) / threshold
+    overvalue = last_rsi > threshold
 
-    if overvalue > 0:
-        sell_fraction = min(overvalue, 0.5)
+    if overvalue:
+        sell_fraction = 0.25
         return float(sell_fraction), f"RSI: {last_rsi:.0f} [-{sell_fraction:.0%}]"
     
     return 0.0, "Wait"
