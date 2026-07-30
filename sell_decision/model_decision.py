@@ -102,6 +102,6 @@ def sell_model(prices: pd.Series,
 	if proba.shape[1] == 2:
 		prob_downtrend = float(np.clip(proba[0, 1], 0.0, 1.0))
 		if prob_downtrend > threshold:
-			return sell_fraction, f"Model: {prob_downtrend:.0%}"
+			return sell_fraction, f"Model: {prob_downtrend:.0%} [-{sell_fraction:.0%}]"
 
 	return 0.0, "Model: N/A"

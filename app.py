@@ -67,7 +67,6 @@ class Configuration:
     cooldown_days: int
     cooldown_wait: int
     manual_sell_fraction: float
-    auto_sell_fraction: float
     enable_sell: bool
     enable_model: bool
     enable_ma200: bool
@@ -186,8 +185,7 @@ class BacktestDCA:
 
         model_sell = sell_model(
             prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_model_sell,
-            sell_fraction=self.config.auto_sell_fraction
+            threshold=self.config.threshold_model_sell
         ) if self.config.enable_model else (0.0, "Model: N/A")
 
         signals = sorted([model_sell, ma200_sell, portfolio_sell, zscore_sell, rsi_sell], key=lambda x: x[0])

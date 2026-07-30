@@ -5,7 +5,8 @@ import ta
 
 def sell_portfolio(portfolio_current: int,
                     warmup_invest: int = 1000,
-                    threshold: float = 4.0) -> tuple[float, str]:
+                    threshold: float = 3.0,
+                    sell_fraction: float = 1.0) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до перевищення ліміту інвестицій.
 
@@ -14,20 +15,21 @@ def sell_portfolio(portfolio_current: int,
     - portfolio_current: поточна вартість портфелю
     - warmup_invest: сума портфелю, яку ми вважаємо "оптимальною" після періоду розігріву
     - threshold: поріг для визначення перевищення ліміту інвестицій
+    - sell_fraction: фракція портфелю для продажу
     """
 
     threshold_portfolio = warmup_invest * threshold
     overvalue = portfolio_current > threshold_portfolio
 
     if overvalue:
-        sell_fraction = 1.0
         return sell_fraction, f"Limit: {int(portfolio_current)}$ [-{sell_fraction:.0%}]"
          
     return 0.0, "Wait"
 
 
 def sell_ma200(prices: pd.Series,
-               threshold: float = 2.0) -> tuple[float, str]:
+               threshold: float = 2.0,
+               sell_fraction: float = 0.5) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до відхилення ціни від 200-денної MA.
 
@@ -42,15 +44,15 @@ def sell_ma200(prices: pd.Series,
     overvalue = last_price > threshold_ma
 
     if overvalue:
-        sell_fraction = 0.5
-        return sell_fraction, f"MA200: {last_price:.2f} [-{sell_fraction:.0%}]"
+        return sell_fraction, f"MA200: {last_ma200:.2f} [-{sell_fraction:.0%}]"
 
     return 0.0, "Wait"
 
 
 def sell_zscore(prices: pd.Series,
                 k: int = 200,
-                threshold: float = 3.0) -> tuple[float, str]:
+                threshold: float = 1.5,
+                sell_fraction: float = 0.25) -> tuple[float, str]:
 
     """
     Продає частину портфелю, якщо Z-score перевищує поріг.
@@ -63,14 +65,14 @@ def sell_zscore(prices: pd.Series,
     overvalue = last_zscore > threshold
 
     if overvalue:
-        sell_fraction = 0.25
         return sell_fraction, f"Z-score: {last_zscore:.2f} [-{sell_fraction:.0%}]"
 
     return 0.0, "Wait"
 
 
 def sell_rsi(prices: pd.Series,
-             threshold: float = 75.0) -> tuple[float, str]:
+             threshold: float = 75.0,
+             sell_fraction: float = 0.25) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до відхилення RSI від нейтральної зони 50
 
@@ -83,7 +85,6 @@ def sell_rsi(prices: pd.Series,
     overvalue = last_rsi > threshold
 
     if overvalue:
-        sell_fraction = 0.25
         return float(sell_fraction), f"RSI: {last_rsi:.0f} [-{sell_fraction:.0%}]"
     
     return 0.0, "Wait"
