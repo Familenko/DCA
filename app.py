@@ -64,7 +64,7 @@ class Configuration:
     freq: str
     fee: float
     minimum_profit: float
-    cooldown_days: int
+    cooldown_days: dict
     cooldown_wait: int
     manual_sell_fraction: float
     sell_fraction: dict
@@ -123,7 +123,7 @@ class BacktestDCA:
         self.history = None
 
         # --- initialize cooldown ---
-        self.cooldown = self.config.cooldown_days
+        self.cooldown = self.config.cooldown_wait
 
     def execute_buy(self, price: float):
         effective_amount = self.config.buy_amount * (1 - self.config.fee)
@@ -220,7 +220,13 @@ class BacktestDCA:
                     self.active_buy = False if sell_fraction == 1.0 else True
                     self.execute_sell(price=price, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
-                    self.cooldown = self.config.cooldown_days
+                    
+                    if sell_fraction == self.config.sell_fraction['high']:
+                        self.cooldown = self.config.cooldown_days['high']
+                    elif sell_fraction == self.config.sell_fraction['medium']:
+                        self.cooldown = self.config.cooldown_days['medium']
+                    elif sell_fraction == self.config.sell_fraction['low']:
+                        self.cooldown = self.config.cooldown_days['low']
 
             # --- record history ---
             self.state.update_history()

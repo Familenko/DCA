@@ -8,14 +8,19 @@ default_params:
   freq: "W-MON"
   fee: 0.01
   minimum_profit: 2.0
-  cooldown_days: 30
   cooldown_wait: 60
   manual_sell_fraction: null
+
   sell_fraction:
     low: 0.25
     medium: 0.5
     high: 1.0
-    
+
+  cooldown_days:
+    low: 7
+    medium: 30
+    high: 90
+
   enable_sell: true
   enable_model: true
   enable_ma200: true

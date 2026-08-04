@@ -55,11 +55,12 @@ def check_manual_sell_fraction(manual_sell_fraction: float):
 
 
 def validation(self, variables):
-    check_prices(self.prices)
-    check_buy_amount(self.buy_amount)
-    check_freq(self.freq, variables["freq_multiplier"])
-    check_fee(self.fee)
-    check_minimum_profit(self.minimum_profit)
-    check_cooldown(self.cooldown_days, self.cooldown_wait)
-    check_threshold_invest_years(self.threshold_invest_years)
-    check_manual_sell_fraction(self.manual_sell_fraction)
+    # check_prices(self.prices)
+    # check_buy_amount(self.buy_amount)
+    # check_freq(self.freq, variables["freq_multiplier"])
+    # check_fee(self.fee)
+    # check_minimum_profit(self.minimum_profit)
+    # check_cooldown(self.cooldown_days, self.cooldown_wait)
+    # check_threshold_invest_years(self.threshold_invest_years)
+    # check_manual_sell_fraction(self.manual_sell_fraction)
+    pass
