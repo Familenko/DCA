@@ -7,18 +7,18 @@ default_params:
   buy_amount: 10.0
   freq: "W-MON"
   fee: 0.01
-  minimum_profit: 1.1
+  minimum_profit: 1.5
   cooldown_wait: 7
   manual_sell_fraction: null
 
   sell_fraction:
-    low: 0.1
-    medium: 0.25
+    low: 0.25
+    medium: 0.5
     high: 1.0
 
   cooldown_days:
-    low: 7
-    medium: 30
+    low: 30
+    medium: 60
     high: 90
 
   enable_sell: true
@@ -30,9 +30,9 @@ default_params:
   enable_rsi: true
   threshold_invest_years: 3.0
   threshold_model_sell: 0.5
-  threshold_ma200_sell: 2.0
+  threshold_ma200_sell: 1.5
   threshold_ma20_sell: 3.0
   threshold_zscore_sell: 1.5
-  threshold_rsi_sell: 75.0
+  threshold_rsi_sell: 70.0
 
 banking_rate: 0.02
