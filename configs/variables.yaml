@@ -11,6 +11,11 @@ default_params:
   cooldown_days: 30
   cooldown_wait: 60
   manual_sell_fraction: null
+  sell_fraction:
+    low: 0.25
+    medium: 0.5
+    high: 1.0
+    
   enable_sell: true
   enable_model: true
   enable_ma200: true
