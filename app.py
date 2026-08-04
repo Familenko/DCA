@@ -8,7 +8,7 @@ import yaml
 from utils.mdd import max_drawdown
 from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
-from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_zscore, sell_rsi
+from sell_decision.analitic_decision import sell_ma200, sell_ma20, sell_portfolio, sell_zscore, sell_rsi
 from sell_decision.model_decision import sell_model
 from utils.validation import validation
 
@@ -71,12 +71,14 @@ class Configuration:
     enable_sell: bool
     enable_model: bool
     enable_ma200: bool
+    enable_ma20: bool
     enable_zscore: bool
     enable_portfolio: bool
     enable_rsi: bool
     threshold_invest_years: int
     threshold_model_sell: float
     threshold_ma200_sell: float
+    threshold_ma20_sell: float
     threshold_zscore_sell: float
     threshold_rsi_sell: float
 
@@ -169,6 +171,12 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['medium']
             ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
         
+        ma20_sell = sell_ma20(
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_ma20_sell,
+            sell_fraction=self.config.sell_fraction['medium']
+            ) if self.config.enable_ma20 else (0.0, "MA20: N/A")
+
         portfolio_sell = sell_portfolio(
             portfolio_current=self.state.portfolio,
             warmup_invest=self.config.warmup_invest,
@@ -194,7 +202,7 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['low']
         ) if self.config.enable_model else (0.0, "Model: N/A")
 
-        signals = sorted([model_sell, ma200_sell, portfolio_sell, zscore_sell, rsi_sell], key=lambda x: x[0])
+        signals = sorted([model_sell, ma20_sell, ma200_sell, portfolio_sell, zscore_sell, rsi_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
         return sell_fraction, sell_msg

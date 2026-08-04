@@ -49,6 +49,28 @@ def sell_ma200(prices: pd.Series,
     return 0.0, "Wait"
 
 
+def sell_ma20(prices: pd.Series,
+               threshold: float = 3.0,
+               sell_fraction: float = 0.5) -> tuple[float, str]:
+    """
+    Продає частину портфелю пропорційно до відхилення ціни від 20-денної MA.
+
+    Параметри:
+    - prices: серія цін
+    """
+
+    ma20 = prices.rolling(20).mean()
+    last_price = prices.iloc[-1]
+    last_ma20 = ma20.iloc[-1]
+    threshold_ma = last_ma20 * threshold
+    overvalue = last_price > threshold_ma
+
+    if overvalue:
+        return sell_fraction, f"MA20: {last_ma20:.2f} [-{sell_fraction:.0%}]"
+
+    return 0.0, "Wait"
+
+
 def sell_zscore(prices: pd.Series,
                 k: int = 200,
                 threshold: float = 1.5,
