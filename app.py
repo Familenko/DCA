@@ -199,7 +199,7 @@ class BacktestDCA:
         model_sell = sell_model(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_model_sell,
-            sell_fraction=self.config.sell_fraction['low']
+            sell_fraction=self.config.sell_fraction['medium']
         ) if self.config.enable_model else (0.0, "Model: N/A")
 
         signals = sorted([model_sell, ma20_sell, ma200_sell, portfolio_sell, zscore_sell, rsi_sell], key=lambda x: x[0])

@@ -22,7 +22,7 @@ default_params:
     high: 90
 
   enable_sell: true
-  enable_model: false
+  enable_model: true
   enable_ma200: true
   enable_ma20: true
   enable_zscore: true
@@ -30,7 +30,7 @@ default_params:
   enable_rsi: true
   threshold_invest_years: 3.0
   threshold_model_sell: 0.5
-  threshold_ma200_sell: 1.5
+  threshold_ma200_sell: 2.0
   threshold_ma20_sell: 3.0
   threshold_zscore_sell: 1.5
   threshold_rsi_sell: 70.0
