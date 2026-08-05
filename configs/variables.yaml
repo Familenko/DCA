@@ -28,7 +28,7 @@ default_params:
   enable_zscore: true
   enable_portfolio: true
   enable_rsi: true
-  threshold_invest_years: 3.0
+  threshold_invest_years: 4.0
   threshold_model_sell: 0.5
   threshold_ma200_sell: 2.0
   threshold_ma20_sell: 3.0
