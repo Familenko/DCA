@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 from prophet import Prophet
@@ -54,6 +55,27 @@ def plot_price(ax_price, history):
         color="orange",
         label="Asset price",
         linewidth=1.0,
+    )
+
+
+def plot_baseline(portfolio_invested, history):
+    portfolio_invested.plot(
+        history.index,
+        history["Baseline"],
+        color="red",
+        label="Baseline",
+        alpha=0.25
+    )
+
+
+def plot_value(portfolio_invested, history):
+    total_value = history["Portfolio"] + np.cumsum(history["Returns"])
+    portfolio_invested.plot(
+        history.index,
+        total_value,
+        color="green",
+        label="Algorithm ($)",
+        alpha=0.25,
     )
 
 
@@ -181,7 +203,13 @@ def title_with_metrics(metrics, last_sale_text):
 
 
 def ploter(metrics, history, return_fig: bool = False):
-    fig, ax_price = plt.subplots(figsize=(16, 8))
+    fig, (ax_price, ax_bottom) = plt.subplots(
+        2,
+        1,
+        figsize=(16, 10),
+        sharex=True,
+        gridspec_kw={"height_ratios": [3, 1]},
+    )
 
     plot_price(ax_price, history)
     plot_changepoints(ax_price, history)
@@ -193,6 +221,8 @@ def ploter(metrics, history, return_fig: bool = False):
     plot_invested(portfolio_invested, history)
 
     plot_take_profit(ax_price, history)
+    plot_value(ax_bottom, history)
+    plot_baseline(ax_bottom, history)
 
     last_sale_text = last_sale_info(history)
     title_with_metrics(metrics, last_sale_text)
@@ -200,7 +230,8 @@ def ploter(metrics, history, return_fig: bool = False):
     # --- settings ---
     portfolio_invested.set_ylabel("Portfolio / Invested ($)")
     ax_price.set_ylabel("Asset price ($)")
-    ax_price.set_xlabel("Date")
+    ax_bottom.set_ylabel("Baseline / Value ($)")
+    ax_bottom.set_xlabel("Date")
 
     y_min = history["Price"].min()
     y_max = history["Price"].max()
@@ -209,11 +240,12 @@ def ploter(metrics, history, return_fig: bool = False):
     # --- legend ---
     l1, lab1 = ax_price.get_legend_handles_labels()
     l2, lab2 = portfolio_invested.get_legend_handles_labels()
-    ax_price.legend(l1 + l2, lab1 + lab2, loc="upper left")
+    l3, lab3 = ax_bottom.get_legend_handles_labels()
+    ax_price.legend(l1 + l2 + l3, lab1 + lab2 + lab3, loc="upper left")
 
     plt.tight_layout()
-    
+
     if return_fig:
         return fig
-    
+
     plt.show()

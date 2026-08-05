@@ -22,6 +22,7 @@ class State:
     date: pd.Timestamp = None
     price: float = 0.0
     qty: float = 0.0
+    baseline_qty: float = 0.0
     cost_basis: float = 0.0
     cash_spent: float = 0.0
     profit: float = 0.0
@@ -32,6 +33,10 @@ class State:
     @property
     def portfolio(self) -> float:
         return self.price * self.qty
+
+    @property
+    def baseline(self) -> float:
+        return self.price * self.baseline_qty
     
     @property
     def average_price(self) -> float:
@@ -52,6 +57,7 @@ class State:
             "Returns": self.returns,
             "Trigger_msg": self.trigger_msg,
             "Portfolio": self.portfolio,
+            "Baseline": self.baseline,
             "Average_price": self.average_price,
         }
 
@@ -132,6 +138,7 @@ class BacktestDCA:
         buy_qty = effective_amount / price
 
         self.state.qty += buy_qty
+        self.state.baseline_qty += buy_qty
         self.state.cost_basis += self.config.buy_amount
 
         # metric only for buy
