@@ -204,8 +204,7 @@ def title_with_metrics(metrics, last_sale_text):
 
 def ploter(metrics, history, return_fig: bool = False):
     fig, (ax_price, ax_bottom) = plt.subplots(
-        2,
-        1,
+        nrows=2, ncols=1,
         figsize=(16, 10),
         sharex=True,
         gridspec_kw={"height_ratios": [3, 1]},
@@ -221,6 +220,7 @@ def ploter(metrics, history, return_fig: bool = False):
     plot_invested(portfolio_invested, history)
 
     plot_take_profit(ax_price, history)
+
     plot_value(ax_bottom, history)
     plot_baseline(ax_bottom, history)
 
