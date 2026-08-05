@@ -232,6 +232,7 @@ def ploter(metrics, history, return_fig: bool = False):
     ax_price.set_ylabel("Asset price ($)")
     ax_bottom.set_ylabel("Baseline / Value ($)")
     ax_bottom.set_xlabel("Date")
+    ax_bottom.grid(True, linestyle="--", alpha=0.5)
 
     y_min = history["Price"].min()
     y_max = history["Price"].max()
