@@ -230,7 +230,7 @@ def ploter(metrics, history, return_fig: bool = False):
     # --- settings ---
     portfolio_invested.set_ylabel("Portfolio / Invested ($)")
     ax_price.set_ylabel("Asset price ($)")
-    ax_bottom.set_ylabel("Baseline / Value ($)")
+    ax_bottom.set_ylabel("Baseline / Algorithm ($)")
     ax_bottom.set_xlabel("Date")
     ax_bottom.grid(True, linestyle="--", alpha=0.5)
 
