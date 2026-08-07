@@ -11,56 +11,34 @@ _DROP_THRESHOLD = 0.1
 
 
 def model_features(prices: pd.Series) -> pd.DataFrame:
-	ret = prices.pct_change()
-	roll_max_30 = prices.rolling(30).max()
-	roll_max_100 = prices.rolling(100).max()
+    roll_max_30 = prices.rolling(30).max()
+    roll_max_100 = prices.rolling(100).max()
 
-	roll_min_30 = prices.rolling(30).min()
-	roll_min_100 = prices.rolling(100).min()
+    roll_min_30 = prices.rolling(30).min()
+    roll_min_100 = prices.rolling(100).min()
 
-	X = pd.DataFrame(index=prices.index)
+    roll_mean_30 = prices.rolling(30).mean()
+    roll_mean_100 = prices.rolling(100).mean()
 
-	# Returns & volatility
-	X["ret_30"] = prices.pct_change(30)
-	X["ret_100"] = prices.pct_change(100)
-     
-	X["vol_30"] = ret.rolling(30).std()
-	X["vol_100"] = ret.rolling(100).std()
+    X = pd.DataFrame(index=prices.index)
 
-	# Moving-average ratios
-	X["ma_ratio_30"] = prices / prices.rolling(30).mean() - 1
-	X["ma_ratio_100"] = prices / prices.rolling(100).mean() - 1
+    # Returns
+    X["ret_30"] = prices.pct_change(30) * 100
+    X["ret_100"] = prices.pct_change(100) * 100
 
-	# Drawdown and drawup
-	X["drawdown_30"] = prices / roll_max_30 - 1
-	X["drawdown_100"] = prices / roll_max_100 - 1
+    # MA ratios
+    X["ma_ratio_30"] = (prices / roll_mean_30 - 1) * 100
+    X["ma_ratio_100"] = (prices / roll_mean_100 - 1) * 100
 
-	X["drawup_30"] = prices / roll_min_30 - 1
-	X["drawup_100"] = prices / roll_min_100 - 1
+    # Drawdown 
+    X["drawdown_30"] = (prices / roll_max_30 - 1) * 100
+    X["drawdown_100"] = (prices / roll_max_100 - 1) * 100
 
-	# RSI (14)
-	rsi = ta.momentum.RSIIndicator(close=prices, window=14)
-	X["rsi_14"] = rsi.rsi() / 100
-
-	# Stochastic RSI
-	stoch_rsi = ta.momentum.StochRSIIndicator(close=prices, window=14)
-	X["stoch_rsi_k"] = stoch_rsi.stochrsi_k()
-	X["stoch_rsi_d"] = stoch_rsi.stochrsi_d()
-
-	# MACD histogram (normalised by price)
-	macd = ta.trend.MACD(close=prices)
-	X["macd_diff"] = macd.macd_diff() / prices
-
-	# Bollinger Bands %B and bandwidth
-	bb = ta.volatility.BollingerBands(close=prices, window=20)
-	X["bb_pct"] = bb.bollinger_pband()
-	X["bb_width"] = bb.bollinger_wband()
-
-	# Rate of Change (12-period)
-	roc = ta.momentum.ROCIndicator(close=prices, window=12)
-	X["roc_12"] = roc.roc() / 100
-      
-	return X
+    # Drawup
+    X["drawup_30"] = (prices / roll_min_30 - 1) * 100
+    X["drawup_100"] = (prices / roll_min_100 - 1) * 100
+        
+    return X
 
 
 class SellModel:
