@@ -19,14 +19,14 @@ default_params:
   enable_sell: true
   enable_extra_buy: true
 
-  enable_model: false
+  enable_model: true
   enable_ma200: true
   enable_bolinger: true
   enable_portfolio: true
   enable_rsi: true
   enable_roc: true
   enable_ppo: true
-  threshold_invest_years: 4.0
+  threshold_invest_years: 10.0
   threshold_model_sell: 0.5
   threshold_ma200_sell: 2.0
   threshold_bolinger_sell: 2.0

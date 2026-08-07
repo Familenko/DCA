@@ -9,7 +9,7 @@ from utils.mdd import max_drawdown
 from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
 from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc, sell_ppo
-from sell_decision.model_decision import sell_model
+from sell_decision.model_decision import SellModel
 from utils.validation import validation
 
 
@@ -133,6 +133,16 @@ class BacktestDCA:
         # --- initialize state ---
         self.state = State()
 
+        # --- initialize model ---
+        self.model = None
+
+        if self.config.enable_model:
+            self.model = SellModel(
+                threshold=self.config.threshold_model_sell,
+                sell_fraction=self.config.sell_fraction['major'],
+                retrain_days=180
+            )
+
         # --- initialize metrics and history ---
         self.metrics = None
         self.history = None
@@ -224,11 +234,10 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['major']
             ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
 
-        model_sell = sell_model(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_model_sell,
-            sell_fraction=self.config.sell_fraction['major']
-        ) if self.config.enable_model else (0.0, "Model: N/A")
+        if self.config.enable_model:
+            model_sell = self.model.predict(self.config.prices.loc[:date])
+        else:
+            model_sell = (0.0, "Model: N/A")
 
         roc_sell = sell_roc(
             prices=self.config.prices.loc[:date],

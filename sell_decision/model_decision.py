@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import ta
 
+from datetime import timedelta
 from sklearn.ensemble import RandomForestClassifier
 
 
@@ -62,46 +63,82 @@ def _build_features(prices: pd.Series) -> pd.DataFrame:
 	return X
 
 
-def sell_model(prices: pd.Series,
-               threshold: float = 0.5,
-			   sell_fraction: float = 0.5) -> tuple[bool, str]:
-	"""
-		Продає частину портфелю пропорційно до ймовірності падіння ціни на основі моделі машинного навчання.
 
-	Параметри:
-	- prices: серія цін
-	- threshold: поріг ймовірності падіння ціни для продажу
-	"""
-    
-	train = prices.iloc[:-1]
+class SellModel:
+    def __init__(
+        self,
+        threshold=0.5,
+        sell_fraction=0.5,
+        retrain_days=180
+    ):
+        self.threshold = threshold
+        self.sell_fraction = sell_fraction
+        self.retrain_days = retrain_days
 
-	if len(train) < 200:
-		return False, "Model: N/A"
+        self.model = None
+        self.last_train_date = None
 
-	# train
-	X = _build_features(train)
-	future_return = train.shift(-_HORIZON_DAYS) / train - 1
-	y = (future_return < -_DROP_THRESHOLD).astype(int)
+    def _train(self, prices: pd.Series):
 
-	dataset = pd.concat([X, y.rename("target")], axis=1).dropna()
-	X_train = dataset.drop(columns=["target"])
-	y_train = dataset["target"]
+        train = prices.iloc[:-1]
 
-	clf = RandomForestClassifier(bootstrap=True, 
-							  n_jobs=-1, 
-							  class_weight="balanced_subsample",
-							  n_estimators=256,
-							  random_state=8)
-	
-	clf.fit(X_train, y_train)
+        X = _build_features(train)
 
-	# predict
-	current = _build_features(prices).iloc[[-1]]
-	proba = clf.predict_proba(current)
-    
-	if proba.shape[1] == 2:
-		prob_downtrend = float(np.clip(proba[0, 1], 0.0, 1.0))
-		if prob_downtrend > threshold:
-			return sell_fraction, f"Model: {prob_downtrend:.0%} [-{sell_fraction:.0%}]"
+        future_return = train.shift(-_HORIZON_DAYS) / train - 1
+        y = (future_return < -_DROP_THRESHOLD).astype(int)
 
-	return 0.0, "Model: N/A"
+        dataset = pd.concat(
+            [X, y.rename("target")],
+            axis=1
+        ).dropna()
+
+        X_train = dataset.drop(columns=["target"])
+        y_train = dataset["target"]
+
+        clf = RandomForestClassifier(
+            bootstrap=True,
+            n_jobs=-1,
+            class_weight="balanced_subsample",
+            n_estimators=256,
+            random_state=8
+        )
+
+        clf.fit(X_train, y_train)
+
+        self.model = clf
+        self.last_train_date = prices.index[-1]
+
+    def predict(self, prices: pd.Series):
+
+        if len(prices) < 200:
+            return 0.0, "Model: N/A"
+
+        current_date = prices.index[-1]
+
+        # Потрібно навчити модель вперше
+        if self.model is None:
+            self._train(prices)
+
+        # Потрібно перенавчити модель
+        elif current_date >= self.last_train_date + timedelta(days=self.retrain_days):
+            self._train(prices)
+
+        # prediction
+        current = _build_features(prices).iloc[[-1]]
+
+        proba = self.model.predict_proba(current)
+
+        if proba.shape[1] == 2:
+
+            prob_downtrend = float(
+                np.clip(proba[0, 1], 0.0, 1.0)
+            )
+
+            if prob_downtrend > self.threshold:
+                return (
+                    self.sell_fraction,
+                    f"Model: {prob_downtrend:.0%} "
+                    f"[-{self.sell_fraction:.0%}]"
+                )
+
+        return 0.0, "Model: N/A"
