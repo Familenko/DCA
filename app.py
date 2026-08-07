@@ -97,6 +97,7 @@ class Configuration:
     threshold_rsi_sell: float
     threshold_roc_sell: float
     threshold_ppo_sell: float
+    threshold_extra_buy: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -154,11 +155,11 @@ class BacktestDCA:
         self.state.cash_spent += self.config.buy_amount
 
     def extra_buy(self, date: float):
-        ma200 = self.config.prices.loc[:date].rolling(200).mean().iloc[-1]
+        avg_price = self.state.average_price
         last_price = self.config.prices.loc[:date].iloc[-1]
-        good_price = last_price < ma200 * 0.75
+        good_price = last_price < (avg_price * self.config.threshold_extra_buy)
         if good_price and self.state.extra_cash > 0:
-            self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (MA200: {ma200:.2f})"
+            self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (price: {last_price:.2f})"
 
             effective_amount = self.state.extra_cash * (1 - self.config.fee)
             buy_qty = effective_amount / last_price
@@ -291,6 +292,7 @@ class BacktestDCA:
         ma200_survival_days = survival_ma200(prices=self.config.prices)
         bank_profit = complex_percent(returns=self.history["Returns"], rate=VARIABLES["banking_rate"])
         bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
+        avg_price = int(self.history['Average_price'].iloc[-1])
         num_take_profits = int((self.history["Trigger_msg"] != "").sum())
         mdd_pct, mdd_usd = max_drawdown(portfolio_value=self.history["Portfolio"],
                                          realized_returns=np.cumsum(self.history["Returns"]))
@@ -304,6 +306,7 @@ class BacktestDCA:
             "Value": value,
             "Profit": profit,
             "Bull_history": bull_history,
+            "Avg_price": avg_price,
             "Num_take_profits": num_take_profits,
             "MDD": mdd_pct,
             "MDD_usd": mdd_usd,

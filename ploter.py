@@ -125,13 +125,13 @@ def plot_ma200(ax_price, history):
 
 def plot_take_profit(ax_price, history):
     # --- take-profits ---
-    trigger_mask = history["Trigger_msg"].astype(str).ne("")
+    msgs = history["Trigger_msg"].astype(str)
+    trigger_mask = msgs.ne("")
     trigger_dates = history.index[trigger_mask]
 
     if len(trigger_dates) > 0:
-        # Highlight the last trigger date in red, others in green
-        last_trigger_date = trigger_dates[-1]
-        colors = ["red" if dt == last_trigger_date else "green" for dt in trigger_dates]
+        buy_trigger = msgs.loc[trigger_dates].str.startswith("Buy")
+        colors = ["red" if is_buy else "green" for is_buy in buy_trigger]
 
         # Scale marker sizes based on returns (larger for higher returns)
         sell_values = history.loc[trigger_dates, "Returns"].clip(lower=0).astype(float)
@@ -196,7 +196,7 @@ def last_sale_info(history):
 
 def title_with_metrics(metrics, last_sale_text):
     plt.title(f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Value: {metrics['Value']}\\$ | Profit: {metrics['Profit']}\\$" +
-                f"\n Portfolio: {metrics['Portfolio']}\\$ | Extra_cash: {metrics['Extra_cash']}\\$" +
+                f"\n Portfolio: {metrics['Portfolio']}\\$ | Extra_cash: {metrics['Extra_cash']}\\$ | Avg_price: {metrics['Avg_price']}\\$" +
                 f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d" +
                 f"\n {last_sale_text}")
 
