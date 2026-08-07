@@ -111,9 +111,6 @@ class BacktestDCA:
         prices: pd.Series,
         strategy: dict | None = None
     ):
-
-        self.active_buy = True
-
         # --- initialize configuration ---
         strategy = strategy or {}
         defaults = VARIABLES["default_params"]
@@ -231,7 +228,7 @@ class BacktestDCA:
                 self.cooldown -= 1
 
             # --- DCA buy ---
-            if date in self.config.buy_dates and self.active_buy:
+            if date in self.config.buy_dates:
                 self.execute_buy(price)
 
             # --- decide and execute sell ---
@@ -240,7 +237,6 @@ class BacktestDCA:
 
                 sell_fraction, sell_msg = self.decide_sell(date=date)
                 if sell_fraction > 0:
-                    self.active_buy = False if sell_fraction == 1.0 else True
                     self.execute_sell(price=price, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     
