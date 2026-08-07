@@ -63,13 +63,13 @@ def _build_features(prices: pd.Series) -> pd.DataFrame:
 	return X
 
 
-
 class SellModel:
     def __init__(
         self,
         threshold=0.5,
         sell_fraction=0.5,
-        retrain_days=180
+        retrain_days=180,
+        prices=None
     ):
         self.threshold = threshold
         self.sell_fraction = sell_fraction
@@ -78,11 +78,14 @@ class SellModel:
         self.model = None
         self.last_train_date = None
 
+        # Рахуємо ВСІ features один раз
+        self.features = _build_features(prices) if prices is not None else None
+
     def _train(self, prices: pd.Series):
 
         train = prices.iloc[:-1]
 
-        X = _build_features(train)
+        X = self.features.loc[train.index]
 
         future_return = train.shift(-_HORIZON_DAYS) / train - 1
         y = (future_return < -_DROP_THRESHOLD).astype(int)
@@ -115,16 +118,15 @@ class SellModel:
 
         current_date = prices.index[-1]
 
-        # Потрібно навчити модель вперше
+        # Перше навчання
         if self.model is None:
             self._train(prices)
 
-        # Потрібно перенавчити модель
+        # Retrain кожні 180 днів
         elif current_date >= self.last_train_date + timedelta(days=self.retrain_days):
             self._train(prices)
 
-        # prediction
-        current = _build_features(prices).iloc[[-1]]
+        current = self.features.loc[[current_date]]
 
         proba = self.model.predict_proba(current)
 

@@ -140,7 +140,8 @@ class BacktestDCA:
             self.model = SellModel(
                 threshold=self.config.threshold_model_sell,
                 sell_fraction=self.config.sell_fraction['major'],
-                retrain_days=180
+                retrain_days=180,
+                prices=self.config.prices
             )
 
         # --- initialize metrics and history ---
