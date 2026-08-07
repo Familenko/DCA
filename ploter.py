@@ -58,8 +58,8 @@ def plot_price(ax_price, history):
     )
 
 
-def plot_baseline(portfolio_invested, history):
-    portfolio_invested.plot(
+def plot_baseline(ax_bottom, history):
+    ax_bottom.plot(
         history.index,
         history["Baseline"],
         color="red",
@@ -68,11 +68,10 @@ def plot_baseline(portfolio_invested, history):
     )
 
 
-def plot_value(portfolio_invested, history):
-    total_value = history["Portfolio"] + np.cumsum(history["Returns"])
-    portfolio_invested.plot(
+def plot_value(ax_bottom, history):
+    ax_bottom.plot(
         history.index,
-        total_value,
+        history["Value"],
         color="green",
         label="Algorithm ($)",
         alpha=0.25,
@@ -196,8 +195,8 @@ def last_sale_info(history):
 
 
 def title_with_metrics(metrics, last_sale_text):
-    plt.title(f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Cash_return: {metrics['Cash_return']}\\$" +
-                f"\n Profit: {metrics['Profit']}\\$ | Portfolio: {metrics['Portfolio']}\\$ | Banking: {metrics['Bank_profit']}\\$" +
+    plt.title(f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Value: {metrics['Value']}\\$ | Profit: {metrics['Profit']}\\$" +
+                f"\n Portfolio: {metrics['Portfolio']}\\$ | Extra_cash: {metrics['Extra_cash']}\\$" +
                 f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d" +
                 f"\n {last_sale_text}")
 

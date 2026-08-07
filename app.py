@@ -27,6 +27,7 @@ class State:
     cash_spent: float = 0.0
     profit: float = 0.0
     returns: float = 0.0
+    extra_cash: float = 0.0
     trigger_msg: str = ""
     history: dict = field(default_factory=dict)
 
@@ -41,6 +42,10 @@ class State:
     @property
     def average_price(self) -> float:
         return self.cost_basis / self.qty if self.qty > 0 else np.nan
+
+    @property
+    def value(self) -> float:
+        return self.portfolio + self.extra_cash
     
     def clear_day(self):
         self.profit = 0.0
@@ -55,10 +60,12 @@ class State:
             "Cash_spent": self.cash_spent,
             "Profit": self.profit,
             "Returns": self.returns,
+            "Extra_cash": self.extra_cash,
             "Trigger_msg": self.trigger_msg,
             "Portfolio": self.portfolio,
             "Baseline": self.baseline,
             "Average_price": self.average_price,
+            "Value": self.value
         }
 
 
@@ -143,6 +150,19 @@ class BacktestDCA:
         # metric only for buy
         self.state.cash_spent += self.config.buy_amount
 
+    def extra_buy(self, date: float):
+        ma200 = self.config.prices.loc[:date].rolling(200).mean().iloc[-1]
+        last_price = self.config.prices.loc[:date].iloc[-1]
+        if last_price < ma200 and self.state.extra_cash > 0:
+            self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (MA200: {ma200:.2f})"
+
+            effective_amount = self.state.extra_cash * (1 - self.config.fee)
+            buy_qty = effective_amount / last_price
+
+            self.state.qty += buy_qty
+            self.state.cost_basis += self.state.extra_cash
+            self.state.extra_cash = 0.0
+
     def execute_sell(self, price: float, sell_fraction: float):
         sell_qty = self.state.qty * sell_fraction
         sell_basis = self.state.cost_basis * sell_fraction
@@ -154,6 +174,7 @@ class BacktestDCA:
         # metric only for sell
         self.state.profit += sell_returns - sell_basis
         self.state.returns += sell_returns
+        self.state.extra_cash += sell_returns
 
     def decide_time(self):
         enaugh_waited = self.cooldown == 0
@@ -230,6 +251,7 @@ class BacktestDCA:
             # --- DCA buy ---
             if date in self.config.buy_dates:
                 self.execute_buy(price)
+                self.extra_buy(price)
 
             # --- decide and execute sell ---
             if self.decide_time() and self.config.enable_sell:
@@ -257,6 +279,7 @@ class BacktestDCA:
         cash_spent = int(self.history["Cash_spent"].iloc[-1])
         cash_return = int(self.history["Returns"].sum())
         portfolio = int(self.history["Portfolio"].iloc[-1])
+        value = int(self.history["Value"].iloc[-1])
         profit = int(self.history["Profit"].sum())
         ma200_survival_days = survival_ma200(prices=self.config.prices)
         bank_profit = complex_percent(returns=self.history["Returns"], rate=VARIABLES["banking_rate"])
@@ -269,7 +292,9 @@ class BacktestDCA:
             "Target": self.config.target,
             "Cash_spent": cash_spent,
             "Cash_return": cash_return,
+            "Extra_cash": int(self.state.extra_cash),
             "Portfolio": portfolio,
+            "Value": value,
             "Profit": profit,
             "Bull_history": bull_history,
             "Num_take_profits": num_take_profits,
