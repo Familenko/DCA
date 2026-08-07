@@ -8,7 +8,7 @@ import yaml
 from utils.mdd import max_drawdown
 from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
-from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi
+from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc
 from sell_decision.model_decision import sell_model
 from utils.validation import validation
 
@@ -80,11 +80,13 @@ class Configuration:
     enable_bolinger: bool
     enable_portfolio: bool
     enable_rsi: bool
+    enable_roc: bool
     threshold_invest_years: int
     threshold_model_sell: float
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
     threshold_rsi_sell: float
+    threshold_roc_sell: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -201,7 +203,13 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['medium']
         ) if self.config.enable_model else (0.0, "Model: N/A")
 
-        signals = sorted([model_sell, ma200_sell, portfolio_sell, bolinger_sell, rsi_sell], key=lambda x: x[0])
+        roc_sell = sell_roc(
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_roc_sell,
+            sell_fraction=self.config.sell_fraction['medium']
+        ) if self.config.enable_roc else (0.0, "ROC: N/A")
+
+        signals = sorted([roc_sell, model_sell, ma200_sell, portfolio_sell, bolinger_sell, rsi_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
         return sell_fraction, sell_msg

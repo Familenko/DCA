@@ -88,3 +88,20 @@ def sell_rsi(prices: pd.Series,
         return float(sell_fraction), f"RSI: {last_rsi:.0f} [-{sell_fraction:.0%}]"
     
     return 0.0, "Wait"
+
+
+def sell_roc(prices: pd.Series,
+             window: int = 30,
+             threshold: float = 100.0,
+             sell_fraction: float = 0.5) -> tuple[float, str]:
+    """
+    Продає частину портфелю, якщо ціна виросла більше ніж на threshold% за window днів.
+    """
+    roc = ta.momentum.ROCIndicator(close=prices, window=window).roc()
+    last_val = roc.iloc[-1]
+    overvalue = last_val > threshold
+
+    if overvalue:
+        return sell_fraction, f"ROC({window}d): {last_val:.1f}% [-{sell_fraction:.0%}]"
+
+    return 0.0, "Wait"

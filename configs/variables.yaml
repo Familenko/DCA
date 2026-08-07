@@ -27,10 +27,12 @@ default_params:
   enable_bolinger: true
   enable_portfolio: true
   enable_rsi: true
+  enable_roc: true
   threshold_invest_years: 4.0
   threshold_model_sell: 0.5
   threshold_ma200_sell: 2.0
   threshold_bolinger_sell: 2.0
   threshold_rsi_sell: 80.0
+  threshold_roc_sell: 200.0
 
 banking_rate: 0.02
