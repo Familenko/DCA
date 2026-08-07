@@ -82,6 +82,7 @@ class Configuration:
     manual_sell_fraction: float
     sell_fraction: dict
     enable_sell: bool
+    enable_extra_buy: bool
     enable_model: bool
     enable_ma200: bool
     enable_bolinger: bool
@@ -139,7 +140,7 @@ class BacktestDCA:
         # --- initialize cooldown ---
         self.cooldown = self.config.cooldown_wait
 
-    def execute_buy(self, date: float):
+    def regular_buy(self, date: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
 
         effective_amount = self.config.buy_amount * (1 - self.config.fee)
@@ -155,7 +156,7 @@ class BacktestDCA:
     def extra_buy(self, date: float):
         ma200 = self.config.prices.loc[:date].rolling(200).mean().iloc[-1]
         last_price = self.config.prices.loc[:date].iloc[-1]
-        good_price = last_price < ma200 * 0.5
+        good_price = last_price < ma200 * 0.75
         if good_price and self.state.extra_cash > 0:
             self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (MA200: {ma200:.2f})"
 
@@ -254,8 +255,10 @@ class BacktestDCA:
 
             # --- DCA buy ---
             if date in self.config.buy_dates:
-                self.execute_buy(date=date)
-                self.extra_buy(date=date)
+                self.regular_buy(date=date)
+
+                if self.config.enable_extra_buy:
+                    self.extra_buy(date=date)
 
             # --- decide and execute sell ---
             if self.decide_time() and self.config.enable_sell:

@@ -17,6 +17,8 @@ default_params:
     major: 0.5
 
   enable_sell: true
+  enable_extra_buy: true
+  
   enable_model: false
   enable_ma200: true
   enable_bolinger: true
