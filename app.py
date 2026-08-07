@@ -140,7 +140,7 @@ class BacktestDCA:
         # --- initialize cooldown ---
         self.cooldown = self.config.cooldown_wait
 
-    def regular_buy(self, date: float):
+    def buy_regular(self, date: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
 
         effective_amount = self.config.buy_amount * (1 - self.config.fee)
@@ -153,7 +153,7 @@ class BacktestDCA:
         # metric only for buy
         self.state.cash_spent += self.config.buy_amount
 
-    def extra_buy(self, date: float):
+    def buy_extra(self, date: float):
         avg_price = self.state.average_price
         last_price = self.config.prices.loc[:date].iloc[-1]
         profit_threshold = 1 - self.config.minimum_profit
@@ -168,7 +168,7 @@ class BacktestDCA:
             self.state.cost_basis += self.state.extra_cash
             self.state.extra_cash = 0.0
 
-    def execute_sell(self, date: float, sell_fraction: float):
+    def sell(self, date: float, sell_fraction: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
         sell_qty = self.state.qty * sell_fraction
         sell_basis = self.state.cost_basis * sell_fraction
@@ -257,10 +257,10 @@ class BacktestDCA:
 
             # --- DCA buy ---
             if date in self.config.buy_dates:
-                self.regular_buy(date=date)
+                self.buy_regular(date=date)
 
                 if self.config.enable_extra_buy:
-                    self.extra_buy(date=date)
+                    self.buy_extra(date=date)
 
             # --- decide and execute sell ---
             if self.decide_time() and self.config.enable_sell:
@@ -268,7 +268,7 @@ class BacktestDCA:
 
                 sell_fraction, sell_msg = self.decide_sell(date=date)
                 if sell_fraction > 0:
-                    self.execute_sell(date=date, sell_fraction=sell_fraction)
+                    self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     self.cooldown = self.config.cooldown_days
 
