@@ -234,7 +234,7 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['major']
             ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
 
-        if self.config.enable_model:
+        if self.model:
             model_sell = self.model.predict(self.config.prices.loc[:date])
         else:
             model_sell = (0.0, "Model: N/A")
