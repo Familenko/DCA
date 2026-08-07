@@ -9,15 +9,12 @@ default_params:
   fee: 0.01
   minimum_profit: 1.1
   cooldown_wait: 7
+  cooldown_days: 30
   manual_sell_fraction: null
 
   sell_fraction:
     minor: 0.25
     major: 0.5
-
-  cooldown_days:
-    minor: 30
-    major: 90
 
   enable_sell: true
   enable_model: false

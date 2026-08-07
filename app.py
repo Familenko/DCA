@@ -70,7 +70,7 @@ class Configuration:
     freq: str
     fee: float
     minimum_profit: float
-    cooldown_days: dict
+    cooldown_days: int
     cooldown_wait: int
     manual_sell_fraction: float
     sell_fraction: dict
@@ -239,11 +239,7 @@ class BacktestDCA:
                 if sell_fraction > 0:
                     self.execute_sell(price=price, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
-                    
-                    if sell_fraction == self.config.sell_fraction['major']:
-                        self.cooldown = self.config.cooldown_days['major']
-                    elif sell_fraction == self.config.sell_fraction['minor']:
-                        self.cooldown = self.config.cooldown_days['minor']
+                    self.cooldown = self.config.cooldown_days
 
             # --- record history ---
             self.state.update_history()
