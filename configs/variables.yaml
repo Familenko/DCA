@@ -31,7 +31,6 @@ default_params:
   threshold_invest_years: 4.0
   threshold_model_sell: 0.5
   threshold_ma200_sell: 2.0
-  threshold_ma20_sell: 3.0
   threshold_zscore_sell: 2.0
   threshold_rsi_sell: 80.0
 
