@@ -27,11 +27,12 @@ default_params:
   enable_roc: true
   enable_ppo: true
   threshold_invest_years: 10.0
-  threshold_model_sell: 0.5
+  threshold_model_sell: 0.75
   threshold_ma200_sell: 2.0
   threshold_bolinger_sell: 2.0
   threshold_rsi_sell: 80.0
   threshold_roc_sell: 200.0
   threshold_ppo_sell: 10.0
+  retrain_days: 360
 
 banking_rate: 0.02

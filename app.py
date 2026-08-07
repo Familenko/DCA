@@ -97,6 +97,7 @@ class Configuration:
     threshold_rsi_sell: float
     threshold_roc_sell: float
     threshold_ppo_sell: float
+    retrain_days: int
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -140,7 +141,7 @@ class BacktestDCA:
             self.model = SellModel(
                 threshold=self.config.threshold_model_sell,
                 sell_fraction=self.config.sell_fraction['major'],
-                retrain_days=180,
+                retrain_days=self.config.retrain_days,
                 prices=self.config.prices
             )
 
