@@ -178,7 +178,7 @@ class BacktestDCA:
             portfolio_current=self.state.portfolio,
             warmup_invest=self.config.warmup_invest,
             threshold=self.config.threshold_invest_years,
-            sell_fraction=self.config.sell_fraction['high']
+            sell_fraction=self.config.sell_fraction['medium']
         ) if self.config.enable_portfolio else (0.0, "Limit: N/A")
 
         bolinger_sell = sell_bolinger(
