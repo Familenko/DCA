@@ -9,7 +9,7 @@ from utils.mdd import max_drawdown
 from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
 from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc, sell_ppo
-from sell_decision.model_decision import SellModel
+from sell_decision.model_decision import SellModel, model_features
 from utils.validation import validation
 
 
@@ -138,11 +138,12 @@ class BacktestDCA:
         self.model = None
 
         if self.config.enable_model:
+            features_model = model_features(prices)
             self.model = SellModel(
                 threshold=self.config.threshold_model_sell,
                 sell_fraction=self.config.sell_fraction['major'],
                 retrain_days=self.config.retrain_days,
-                prices=self.config.prices
+                features=features_model
             )
 
         # --- initialize metrics and history ---

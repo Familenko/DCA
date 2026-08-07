@@ -10,7 +10,7 @@ _HORIZON_DAYS = 90
 _DROP_THRESHOLD = 0.1
 
 
-def _build_features(prices: pd.Series) -> pd.DataFrame:
+def model_features(prices: pd.Series) -> pd.DataFrame:
 	ret = prices.pct_change()
 	roll_max_30 = prices.rolling(30).max()
 	roll_max_100 = prices.rolling(100).max()
@@ -66,11 +66,12 @@ def _build_features(prices: pd.Series) -> pd.DataFrame:
 class SellModel:
     def __init__(
         self,
+        features,
         threshold=0.5,
         sell_fraction=0.5,
         retrain_days=180,
-        prices=None
     ):
+        self.features = features
         self.threshold = threshold
         self.sell_fraction = sell_fraction
         self.retrain_days = retrain_days
@@ -78,69 +79,47 @@ class SellModel:
         self.model = None
         self.last_train_date = None
 
-        # Рахуємо ВСІ features один раз
-        self.features = _build_features(prices) if prices is not None else None
-
     def _train(self, prices: pd.Series):
-
-        train = prices.iloc[:-1]
-
-        X = self.features.loc[train.index]
-
-        future_return = train.shift(-_HORIZON_DAYS) / train - 1
+        future_return = prices.shift(-_HORIZON_DAYS) / prices - 1
         y = (future_return < -_DROP_THRESHOLD).astype(int)
+        X = self.features.loc[prices.index]
 
-        dataset = pd.concat(
-            [X, y.rename("target")],
-            axis=1
-        ).dropna()
-
+        dataset = pd.concat([X, y.rename("target")],axis=1).dropna()
         X_train = dataset.drop(columns=["target"])
         y_train = dataset["target"]
 
-        clf = RandomForestClassifier(
+        self.model = RandomForestClassifier(
             bootstrap=True,
             n_jobs=-1,
             class_weight="balanced_subsample",
             n_estimators=256,
             random_state=8
         )
-
-        clf.fit(X_train, y_train)
-
-        self.model = clf
-        self.last_train_date = prices.index[-1]
+        self.model.fit(X_train, y_train)
 
     def predict(self, prices: pd.Series):
-
         if len(prices) < 200:
             return 0.0, "Model: N/A"
 
         current_date = prices.index[-1]
 
-        # Перше навчання
+        # First train
         if self.model is None:
-            self._train(prices)
+            self._train(prices.iloc[:-1])
+            self.last_train_date = current_date
 
-        # Retrain кожні 180 днів
+        # Retrain
         elif current_date >= self.last_train_date + timedelta(days=self.retrain_days):
-            self._train(prices)
+            self._train(prices.iloc[:-1])
+            self.last_train_date = current_date
 
-        current = self.features.loc[[current_date]]
-
-        proba = self.model.predict_proba(current)
+        current_data = self.features.loc[[current_date]]
+        proba = self.model.predict_proba(current_data)
 
         if proba.shape[1] == 2:
-
-            prob_downtrend = float(
-                np.clip(proba[0, 1], 0.0, 1.0)
-            )
+            prob_downtrend = float(np.clip(proba[0, 1], 0.0, 1.0))
 
             if prob_downtrend > self.threshold:
-                return (
-                    self.sell_fraction,
-                    f"Model: {prob_downtrend:.0%} "
-                    f"[-{self.sell_fraction:.0%}]"
-                )
+                return self.sell_fraction, f"Model: {prob_downtrend:.0%} [-{self.sell_fraction:.0%}]"
 
         return 0.0, "Model: N/A"
