@@ -105,3 +105,20 @@ def sell_roc(prices: pd.Series,
         return sell_fraction, f"ROC({window}d): {last_val:.1f}% [-{sell_fraction:.0%}]"
 
     return 0.0, "Wait"
+
+
+def sell_ppo(prices: pd.Series,
+             threshold: float = 5.0,
+             sell_fraction: float = 0.25) -> tuple[float, str]:
+    """
+    Продає частину портфелю, якщо PPO (MACD у %) вище порогу —
+    momentum прискорюється сильніше, ніж на threshold% від ціни.
+    """
+    ppo_ind = ta.momentum.PercentagePriceOscillator(close=prices)
+    last_ppo = ppo_ind.ppo().iloc[-1]
+    overvalue = last_ppo > threshold
+
+    if overvalue:
+        return sell_fraction, f"PPO: {last_ppo:.1f}% [-{sell_fraction:.0%}]"
+
+    return 0.0, "Wait"

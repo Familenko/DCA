@@ -8,7 +8,7 @@ import yaml
 from utils.mdd import max_drawdown
 from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
-from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc
+from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc, sell_ppo
 from sell_decision.model_decision import sell_model
 from utils.validation import validation
 
@@ -81,12 +81,14 @@ class Configuration:
     enable_portfolio: bool
     enable_rsi: bool
     enable_roc: bool
+    enable_ppo: bool
     threshold_invest_years: int
     threshold_model_sell: float
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
     threshold_rsi_sell: float
     threshold_roc_sell: float
+    threshold_ppo_sell: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -171,12 +173,6 @@ class BacktestDCA:
         if self.config.manual_sell_fraction:
             sell_fraction = self.config.manual_sell_fraction
             return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
-        
-        ma200_sell = sell_ma200(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_ma200_sell,
-            sell_fraction=self.config.sell_fraction['medium']
-            ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
 
         portfolio_sell = sell_portfolio(
             portfolio_current=self.state.portfolio,
@@ -197,6 +193,12 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['low']
         ) if self.config.enable_rsi else (0.0, "RSI: N/A")
 
+        ma200_sell = sell_ma200(
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_ma200_sell,
+            sell_fraction=self.config.sell_fraction['medium']
+            ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
+
         model_sell = sell_model(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_model_sell,
@@ -209,7 +211,13 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['medium']
         ) if self.config.enable_roc else (0.0, "ROC: N/A")
 
-        signals = sorted([roc_sell, model_sell, ma200_sell, portfolio_sell, bolinger_sell, rsi_sell], key=lambda x: x[0])
+        ppo_sell = sell_ppo(
+            prices=self.config.prices.loc[:date],
+            threshold=self.config.threshold_ppo_sell,
+            sell_fraction=self.config.sell_fraction['medium']
+        ) if self.config.enable_ppo else (0.0, "PPO: N/A")
+
+        signals = sorted([roc_sell, model_sell, ma200_sell, portfolio_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
         return sell_fraction, sell_msg
