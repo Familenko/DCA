@@ -24,7 +24,6 @@ default_params:
   enable_sell: true
   enable_model: false
   enable_ma200: true
-  enable_ma20: true
   enable_bolinger: true
   enable_portfolio: true
   enable_rsi: true
