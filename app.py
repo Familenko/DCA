@@ -139,9 +139,11 @@ class BacktestDCA:
         # --- initialize cooldown ---
         self.cooldown = self.config.cooldown_wait
 
-    def execute_buy(self, price: float):
+    def execute_buy(self, date: float):
+        last_price = self.config.prices.loc[:date].iloc[-1]
+
         effective_amount = self.config.buy_amount * (1 - self.config.fee)
-        buy_qty = effective_amount / price
+        buy_qty = effective_amount / last_price
 
         self.state.qty += buy_qty
         self.state.baseline_qty += buy_qty
@@ -153,7 +155,8 @@ class BacktestDCA:
     def extra_buy(self, date: float):
         ma200 = self.config.prices.loc[:date].rolling(200).mean().iloc[-1]
         last_price = self.config.prices.loc[:date].iloc[-1]
-        if last_price < ma200 and self.state.extra_cash > 0:
+        good_price = last_price < ma200 * 0.5
+        if good_price and self.state.extra_cash > 0:
             self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (MA200: {ma200:.2f})"
 
             effective_amount = self.state.extra_cash * (1 - self.config.fee)
@@ -163,10 +166,11 @@ class BacktestDCA:
             self.state.cost_basis += self.state.extra_cash
             self.state.extra_cash = 0.0
 
-    def execute_sell(self, price: float, sell_fraction: float):
+    def execute_sell(self, date: float, sell_fraction: float):
+        last_price = self.config.prices.loc[:date].iloc[-1]
         sell_qty = self.state.qty * sell_fraction
         sell_basis = self.state.cost_basis * sell_fraction
-        sell_returns = sell_qty * price * (1 - self.config.fee)
+        sell_returns = sell_qty * last_price * (1 - self.config.fee)
 
         self.state.qty -= sell_qty
         self.state.cost_basis -= sell_basis
@@ -250,8 +254,8 @@ class BacktestDCA:
 
             # --- DCA buy ---
             if date in self.config.buy_dates:
-                self.execute_buy(price)
-                self.extra_buy(price)
+                self.execute_buy(date=date)
+                self.extra_buy(date=date)
 
             # --- decide and execute sell ---
             if self.decide_time() and self.config.enable_sell:
@@ -259,7 +263,7 @@ class BacktestDCA:
 
                 sell_fraction, sell_msg = self.decide_sell(date=date)
                 if sell_fraction > 0:
-                    self.execute_sell(price=price, sell_fraction=sell_fraction)
+                    self.execute_sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     self.cooldown = self.config.cooldown_days
 
