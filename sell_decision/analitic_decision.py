@@ -49,7 +49,7 @@ def sell_ma200(prices: pd.Series,
     return 0.0, "Wait"
 
 
-def sell_zscore(prices: pd.Series,
+def sell_bolinger(prices: pd.Series,
                     k: int = 200,
                     threshold: float = 2.0,
                     sell_fraction: float = 0.25) -> tuple[float, str]:
@@ -65,7 +65,7 @@ def sell_zscore(prices: pd.Series,
     overvalue = last_price > last_upper
 
     if overvalue:
-        return sell_fraction, f"Z-score: {last_price/last_upper:.2f} [-{sell_fraction:.0%}]"
+        return sell_fraction, f"BB: {last_upper:.2f} [-{sell_fraction:.0%}]"
 
     return 0.0, "Wait"
 
