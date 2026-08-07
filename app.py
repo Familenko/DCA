@@ -97,7 +97,6 @@ class Configuration:
     threshold_rsi_sell: float
     threshold_roc_sell: float
     threshold_ppo_sell: float
-    threshold_extra_buy: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -157,7 +156,8 @@ class BacktestDCA:
     def extra_buy(self, date: float):
         avg_price = self.state.average_price
         last_price = self.config.prices.loc[:date].iloc[-1]
-        good_price = last_price < (avg_price * self.config.threshold_extra_buy)
+        profit_threshold = 1 - self.config.minimum_profit
+        good_price = last_price < (avg_price * profit_threshold)
         if good_price and self.state.extra_cash > 0:
             self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (price: {last_price:.2f})"
 
@@ -185,8 +185,9 @@ class BacktestDCA:
     def decide_time(self):
         enaugh_waited = self.cooldown == 0
         have_liquidity = self.state.qty > 0
+        profit_threshold = 1 + self.config.minimum_profit
         upper_limit = self.state.portfolio > self.config.warmup_invest
-        profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
+        profit_sell = self.state.portfolio > profit_threshold * self.state.cost_basis
 
         if enaugh_waited and have_liquidity and upper_limit and profit_sell:
             return True
