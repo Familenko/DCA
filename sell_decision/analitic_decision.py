@@ -49,51 +49,29 @@ def sell_ma200(prices: pd.Series,
     return 0.0, "Wait"
 
 
-def sell_ma20(prices: pd.Series,
-               threshold: float = 3.0,
-               sell_fraction: float = 0.5) -> tuple[float, str]:
-    """
-    Продає частину портфелю пропорційно до відхилення ціни від 20-денної MA.
-
-    Параметри:
-    - prices: серія цін
-    """
-
-    ma20 = prices.rolling(20).mean()
-    last_price = prices.iloc[-1]
-    last_ma20 = ma20.iloc[-1]
-    threshold_ma = last_ma20 * threshold
-    overvalue = last_price > threshold_ma
-
-    if overvalue:
-        return sell_fraction, f"MA20: {last_ma20:.2f} [-{sell_fraction:.0%}]"
-
-    return 0.0, "Wait"
-
-
 def sell_zscore(prices: pd.Series,
-                k: int = 200,
-                threshold: float = 1.5,
-                sell_fraction: float = 0.25) -> tuple[float, str]:
+                    k: int = 200,
+                    threshold: float = 2.0,
+                    sell_fraction: float = 0.25) -> tuple[float, str]:
 
     """
-    Продає частину портфелю, якщо Z-score перевищує поріг.
+    Продає частину портфелю, якщо ціна виходить за верхню межу Болінджера
     """
 
-    ma = prices.rolling(k).mean()
-    std = prices.rolling(k).std()
-    zscore = (prices - ma) / std
-    last_zscore = zscore.iloc[-1]
-    overvalue = last_zscore > threshold
+    bb = ta.volatility.BollingerBands(close=prices, window=k, window_dev=threshold)
+
+    last_price = prices.iloc[-1]
+    last_upper = bb.bollinger_hband().iloc[-1]
+    overvalue = last_price > last_upper
 
     if overvalue:
-        return sell_fraction, f"Z-score: {last_zscore:.2f} [-{sell_fraction:.0%}]"
+        return sell_fraction, f"Z-score: {last_price/last_upper:.2f} [-{sell_fraction:.0%}]"
 
     return 0.0, "Wait"
 
 
 def sell_rsi(prices: pd.Series,
-             threshold: float = 75.0,
+             threshold: float = 80.0,
              sell_fraction: float = 0.25) -> tuple[float, str]:
     """
     Продає частину портфелю пропорційно до відхилення RSI від нейтральної зони 50
