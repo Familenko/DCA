@@ -12,14 +12,12 @@ default_params:
   manual_sell_fraction: null
 
   sell_fraction:
-    low: 0.25
-    medium: 0.5
-    high: 1.0
+    minor: 0.25
+    major: 0.5
 
   cooldown_days:
-    low: 30
-    medium: 90
-    high: 999
+    minor: 30
+    major: 90
 
   enable_sell: true
   enable_model: false
