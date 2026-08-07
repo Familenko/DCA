@@ -292,7 +292,7 @@ class BacktestDCA:
         ma200_survival_days = survival_ma200(prices=self.config.prices)
         bank_profit = complex_percent(returns=self.history["Returns"], rate=VARIABLES["banking_rate"])
         bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
-        avg_price = int(self.history['Average_price'].iloc[-1])
+        avg_price = self.history['Average_price'].iloc[-1]
         num_take_profits = int((self.history["Trigger_msg"] != "").sum())
         mdd_pct, mdd_usd = max_drawdown(portfolio_value=self.history["Portfolio"],
                                          realized_returns=np.cumsum(self.history["Returns"]))

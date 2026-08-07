@@ -196,7 +196,7 @@ def last_sale_info(history):
 
 def title_with_metrics(metrics, last_sale_text):
     plt.title(f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Value: {metrics['Value']}\\$ | Profit: {metrics['Profit']}\\$" +
-                f"\n Portfolio: {metrics['Portfolio']}\\$ | Extra_cash: {metrics['Extra_cash']}\\$ | Avg_price: {metrics['Avg_price']}\\$" +
+                f"\n Portfolio: {metrics['Portfolio']}\\$ | Extra_cash: {metrics['Extra_cash']}\\$ | Avg_price: {metrics['Avg_price']:.0f}\\$" +
                 f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d" +
                 f"\n {last_sale_text}")
 
