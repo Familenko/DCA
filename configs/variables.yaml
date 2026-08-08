@@ -7,7 +7,8 @@ default_params:
   buy_amount: 10.0
   freq: "W-MON"
   fee: 0.01
-  minimum_profit: 0.2
+  minimum_profit: 1.2
+  minimum_loss: 0.8
   cooldown_wait: 7
   cooldown_days: 30
   manual_sell_fraction: null
@@ -19,7 +20,7 @@ default_params:
   enable_sell: true
   enable_extra_buy: true
 
-  enable_model: true
+  enable_model: false
   enable_ma200: true
   enable_bolinger: true
   enable_portfolio: true

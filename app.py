@@ -77,6 +77,7 @@ class Configuration:
     freq: str
     fee: float
     minimum_profit: float
+    minimum_loss: float
     cooldown_days: int
     cooldown_wait: int
     manual_sell_fraction: float
@@ -167,10 +168,11 @@ class BacktestDCA:
         self.state.cash_spent += self.config.buy_amount
 
     def buy_extra(self, date: float):
-        avg_price = self.state.average_price
         last_price = self.config.prices.loc[:date].iloc[-1]
-        profit_threshold = 1 - self.config.minimum_profit
-        good_price = last_price < (avg_price * profit_threshold)
+
+        avg_price = self.state.average_price
+        loss_threshold = self.config.minimum_loss
+        good_price = last_price < (avg_price * loss_threshold)
         if good_price and self.state.extra_cash > 0:
             self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (price: {last_price:.2f})"
 
@@ -183,6 +185,7 @@ class BacktestDCA:
 
     def sell(self, date: float, sell_fraction: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
+        
         sell_qty = self.state.qty * sell_fraction
         sell_basis = self.state.cost_basis * sell_fraction
         sell_returns = sell_qty * last_price * (1 - self.config.fee)
@@ -198,7 +201,7 @@ class BacktestDCA:
     def decide_time(self):
         enaugh_waited = self.cooldown == 0
         have_liquidity = self.state.qty > 0
-        profit_threshold = 1 + self.config.minimum_profit
+        profit_threshold = self.config.minimum_profit
         upper_limit = self.state.portfolio > self.config.warmup_invest
         profit_sell = self.state.portfolio > profit_threshold * self.state.cost_basis
 
