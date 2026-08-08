@@ -151,8 +151,9 @@ class BacktestDCA:
         self.metrics = None
         self.history = None
 
-        # --- initialize cooldown ---
+        # --- initialize indicators ---
         self.cooldown = self.config.cooldown_wait
+        self.active_buy = True
 
     def buy_regular(self, date: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
@@ -219,7 +220,7 @@ class BacktestDCA:
             portfolio_current=self.state.portfolio,
             warmup_invest=self.config.warmup_invest,
             threshold=self.config.threshold_invest_years,
-            sell_fraction=self.config.sell_fraction['major']
+            sell_fraction=1.0
         ) if self.config.enable_portfolio else (0.0, "Limit: N/A")
 
         bolinger_sell = sell_bolinger(
@@ -271,7 +272,7 @@ class BacktestDCA:
                 self.cooldown -= 1
 
             # --- DCA buy ---
-            if date in self.config.buy_dates:
+            if date in self.config.buy_dates and self.active_buy:
                 self.buy_regular(date=date)
 
                 if self.config.enable_extra_buy:
@@ -286,6 +287,7 @@ class BacktestDCA:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     self.cooldown = self.config.cooldown_days
+                    self.active_buy = False if sell_fraction == 1.0 else True
 
             # --- record history ---
             self.state.update_history()
