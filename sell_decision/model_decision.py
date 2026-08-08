@@ -57,14 +57,10 @@ class SellModel:
         self.model = None
         self.last_train_date = None
 
-    def _train(self, prices: pd.Series):
-        future_return = prices.shift(-_HORIZON_DAYS) / prices - 1
-        y = (future_return < -_DROP_THRESHOLD).astype(int)
-        X = self.features.loc[prices.index]
-
-        dataset = pd.concat([X, y.rename("target")],axis=1).dropna()
-        X_train = dataset.drop(columns=["target"])
-        y_train = dataset["target"]
+    def _train(self, X, y):
+        data = X.join(y.rename("target"), how="inner").dropna()
+        X_train = data.drop(columns="target")
+        y_train = data["target"]
 
         self.model = RandomForestClassifier(
             bootstrap=True,
@@ -80,18 +76,23 @@ class SellModel:
             return 0.0, "Model: N/A"
 
         current_date = prices.index[-1]
+        current_data = self.features.loc[[current_date]]
+
+        train_data = prices.iloc[:-1]
+        future_return = train_data.shift(-_HORIZON_DAYS) / train_data - 1
+        y = (future_return < -_DROP_THRESHOLD).astype(int)
+        X = self.features.loc[train_data.index]
 
         # First train
         if self.model is None:
-            self._train(prices.iloc[:-1])
+            self._train(X, y)
             self.last_train_date = current_date
 
         # Retrain
         elif current_date >= self.last_train_date + timedelta(days=self.retrain_days):
-            self._train(prices.iloc[:-1])
+            self._train(X, y)
             self.last_train_date = current_date
 
-        current_data = self.features.loc[[current_date]]
         proba = self.model.predict_proba(current_data)
 
         if proba.shape[1] == 2:
