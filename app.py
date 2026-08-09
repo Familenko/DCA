@@ -142,7 +142,7 @@ class BacktestDCA:
             features_model = model_features(prices)
             self.model = SellModel(
                 threshold=self.config.threshold_model_sell,
-                sell_fraction=self.config.sell_fraction['minor'],
+                sell_fraction=self.config.sell_fraction['major'],
                 retrain_days=self.config.retrain_days,
                 features=features_model
             )
