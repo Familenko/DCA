@@ -23,8 +23,9 @@ def model_features(prices: pd.Series) -> pd.DataFrame:
     X = pd.DataFrame(index=prices.index)
 
     # Returns
-    X["ret_30"] = prices.pct_change(30) * 100
-    X["ret_100"] = prices.pct_change(100) * 100
+    daily_return = prices.pct_change() * 100
+    for days in range(1, 31):
+        X[f"ret_{days}"] = daily_return.shift(days - 1)
 
     # MA ratios
     X["ma_ratio_30"] = (prices / roll_mean_30 - 1) * 100
