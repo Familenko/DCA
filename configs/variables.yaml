@@ -22,7 +22,7 @@ default_params:
   enable_sell: true
   enable_extra_buy: true
 
-  enable_model: false
+  enable_model: true
   enable_ma200: true
   enable_bolinger: true
   enable_portfolio: true

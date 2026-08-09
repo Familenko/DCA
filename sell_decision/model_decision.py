@@ -11,33 +11,32 @@ _DROP_THRESHOLD = 0.1
 
 
 def model_features(prices: pd.Series) -> pd.DataFrame:
-    roll_max_30 = prices.rolling(30).max()
-    roll_max_100 = prices.rolling(100).max()
-
-    roll_min_30 = prices.rolling(30).min()
-    roll_min_100 = prices.rolling(100).min()
-
-    roll_mean_30 = prices.rolling(30).mean()
-    roll_mean_100 = prices.rolling(100).mean()
-
     X = pd.DataFrame(index=prices.index)
 
     # Returns
-    daily_return = prices.pct_change() * 100
-    for days in range(1, 31):
-        X[f"ret_{days}"] = daily_return.shift(days - 1)
+    X["ret_30"] = prices.pct_change(30)
+    X["ret_100"] = prices.pct_change(100)
 
-    # MA ratios
-    X["ma_ratio_30"] = (prices / roll_mean_30 - 1) * 100
-    X["ma_ratio_100"] = (prices / roll_mean_100 - 1) * 100
+    # Moving-average ratios
+    X["ma_ratio_30"] = prices / prices.rolling(30).mean() - 1
+    X["ma_ratio_100"] = prices / prices.rolling(100).mean() - 1
 
-    # Drawdown 
-    X["drawdown_30"] = (prices / roll_max_30 - 1) * 100
-    X["drawdown_100"] = (prices / roll_max_100 - 1) * 100
+    # Volatility
+    ret = prices.pct_change()
+    X["vol_30"] = ret.rolling(30).std()
+    X["vol_100"] = ret.rolling(100).std()
+
+    # Drawdown
+    roll_max_30 = prices.rolling(30).max()
+    roll_max_100 = prices.rolling(100).max()
+    X["drawdown_30"] = prices / roll_max_30 - 1
+    X["drawdown_100"] = prices / roll_max_100 - 1
 
     # Drawup
-    X["drawup_30"] = (prices / roll_min_30 - 1) * 100
-    X["drawup_100"] = (prices / roll_min_100 - 1) * 100
+    roll_min_30 = prices.rolling(30).min()
+    roll_min_100 = prices.rolling(100).min()
+    X["drawup_30"] = prices / roll_min_30 - 1
+    X["drawup_100"] = prices / roll_min_100 - 1
         
     return X
 
