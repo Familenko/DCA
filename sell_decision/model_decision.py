@@ -11,22 +11,32 @@ _DROP_THRESHOLD = 0.1
 
 
 def model_features(prices: pd.Series) -> pd.DataFrame:
-    roll_max_20 = prices.rolling(20).max()
-    roll_min_20 = prices.rolling(20).min()
-    roll_mean_20 = prices.rolling(20).mean()
+    roll_max_30 = prices.rolling(30).max()
+    roll_max_100 = prices.rolling(100).max()
+
+    roll_min_30 = prices.rolling(30).min()
+    roll_min_100 = prices.rolling(100).min()
+
+    roll_mean_30 = prices.rolling(30).mean()
+    roll_mean_100 = prices.rolling(100).mean()
 
     X = pd.DataFrame(index=prices.index)
 
-    X["ret_20"] = prices.pct_change(20) * 100
-    X["ma_ratio_20"] = (prices / roll_mean_20 - 1) * 100
-    X["drawdown_20"] = (prices / roll_max_20 - 1) * 100
-    X["drawup_20"] = (prices / roll_min_20 - 1) * 100
+    # Returns
+    X["ret_30"] = prices.pct_change(30) * 100
+    X["ret_100"] = prices.pct_change(100) * 100
 
-    # Indicators
-    X["BB"] = prices / ta.volatility.BollingerBands(close=prices).bollinger_hband()
-    X["RSI"] = ta.momentum.RSIIndicator(close=prices).rsi()
-    X["ROC"] = ta.momentum.ROCIndicator(close=prices, window=30).roc()
-    X["PPO"] = ta.momentum.PercentagePriceOscillator(close=prices).ppo()
+    # MA ratios
+    X["ma_ratio_30"] = (prices / roll_mean_30 - 1) * 100
+    X["ma_ratio_100"] = (prices / roll_mean_100 - 1) * 100
+
+    # Drawdown 
+    X["drawdown_30"] = (prices / roll_max_30 - 1) * 100
+    X["drawdown_100"] = (prices / roll_max_100 - 1) * 100
+
+    # Drawup
+    X["drawup_30"] = (prices / roll_min_30 - 1) * 100
+    X["drawup_100"] = (prices / roll_min_100 - 1) * 100
         
     return X
 
