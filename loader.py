@@ -66,3 +66,22 @@ def loader(tickers, fields=("Close", "Volume")):
     validate_output(dfs)
 
     return dfs
+
+
+if __name__ == "__main__":
+    tickers = {
+        "BTC": {"tickers": "BTC-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "ETH": {"tickers": "ETH-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "SOL": {"tickers": "SOL-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "XRP": {"tickers": "XRP-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "DOGE": {"tickers": "DOGE-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "ADA": {"tickers": "ADA-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "DOT": {"tickers": "DOT-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "LINK": {"tickers": "LINK-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "XLM": {"tickers": "XLM-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+        "XMR": {"tickers": "XMR-USD", "start_date": "2020-02-13", "end_date": "2026-02-13"},
+    }
+    dfs = loader(tickers)
+    close = dfs["Close"]
+    close.to_csv("data/test_crypto.csv")
+    print("Data saved to data/test_crypto.csv")

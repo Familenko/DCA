@@ -28,11 +28,11 @@
 ```
 ціни (Yahoo Finance / CSV)
         >>>
-   BacktestDCA (app.py)
+BacktestDCA (app.py)
         >>>
-  історія + метрики
+історія + метрики
         >>>
-  графік / веб-UI (ploter.py, web.py)
+графік / веб-UI (ploter.py, web.py)
 ```
 
 1. Завантажуються денні ціни (`Close`).
@@ -98,7 +98,6 @@ pip install -r requirements.txt
 python web.py
 ```
 
-
 (скрипт сам перезапустить себе через Streamlit, якщо запущений без контексту Streamlit.)
 
 За замовчуванням UI доступний на [http://localhost:8501](http://localhost:8501).
@@ -122,6 +121,11 @@ bt = BacktestDCA(
     strategy={"buy_amount": 10, "freq": "W-MON"},
 )
 history, metrics = bt.run()
+```
+
+### Вигрузка даних
+```bash
+python loader.py
 ```
 
 ---
