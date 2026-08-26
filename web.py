@@ -70,7 +70,8 @@ def main() -> None:
         
         buy_amount = st.number_input("Buy amount", min_value=1.0, value=10.0, step=1.0)
         freq = st.selectbox("Frequency", VARIABLES["freq_multiplier"], index=0)
-        minimum_profit = st.number_input("Profit multiple", min_value=1.0, value=2.0, step=0.1)
+        minimum_profit = st.number_input("Minimum profit", min_value=1.0, value=1.2, step=0.1)
+        minimum_loss = st.number_input("Minimum loss", max_value=1.0, value=0.8, step=0.1)
 
         use_fixed_sell_fraction = st.checkbox("Manual sell fraction", value=False)
         manual_sell_fraction: Optional[float] = None
@@ -78,7 +79,7 @@ def main() -> None:
             manual_sell_fraction = st.number_input("Sell fraction", min_value=0.1, max_value=1.0, value=0.5, step=0.05)
         
         if not use_fixed_sell_fraction:
-            enable_sell = st.checkbox("Disable selling", value=True)
+            enable_sell = st.checkbox("Enable selling", value=True)
         else:
             enable_sell = True
 
@@ -87,6 +88,7 @@ def main() -> None:
             cooldown_days = st.number_input("Cooldown days", min_value=1, max_value=365, value=30, step=1)
             cooldown_wait = st.number_input("Cooldown wait", min_value=1, max_value=365, value=7, step=1)
             fee = st.number_input("Fee %", min_value=0.0, max_value=1.0, value=0.01, step=0.001)
+            max_invest_years = st.number_input("Max invest years", min_value=2, max_value=20, value=5, step=1)
 
         run_clicked = st.button("Run backtest", type="primary")
 
@@ -110,10 +112,12 @@ def main() -> None:
                 "freq": freq,
                 "fee": float(fee),
                 "minimum_profit": float(minimum_profit),
+                "minimum_loss": float(minimum_loss),
                 "cooldown_days": int(cooldown_days),
                 "cooldown_wait": int(cooldown_wait),
                 "manual_sell_fraction": manual_sell_fraction,
                 "enable_sell": bool(enable_sell),
+                "threshold_invest_years": int(max_invest_years),
             }
 
         bt = BacktestDCA(
@@ -131,9 +135,9 @@ def main() -> None:
         return
     
     metric_cash_spent = metrics.get("Cash_spent", 0.0)
-    metric_cash_return = metrics.get("Cash_return", 0.0)
+    metric_value = metrics.get("Value", 0.0)
     metric_portfolio = metrics.get("Portfolio", 0.0)
-    metric_profit = metrics.get("Profit", 0.0)
+    metric_extra_cash = metrics.get("Extra_cash", 0.0)
 
     trigger_mask = history["Trigger_msg"].astype(str).ne("")
 
@@ -152,8 +156,8 @@ def main() -> None:
     st.subheader("Metrics")
     st.markdown(
         f"""
-        - Spend: \\${metric_cash_spent:,.0f} | Returns: \\${metric_cash_return:,.0f}
-        - Portfolio: \\${metric_portfolio:,.0f} | Profit: \\${metric_profit:,.0f}
+        - Spend: \\${metric_cash_spent:,.0f} | Value: \\${metric_value:,.0f}
+        - Portfolio: \\${metric_portfolio:,.0f} | Extra cash: \\${metric_extra_cash:,.0f}
         """
     )
 
