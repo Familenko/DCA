@@ -14,9 +14,9 @@ ASSETS = {
 }
 
 MENU_ITEMS = {
-    'Get Help': 'https://github.com/Familenko/backtest/blob/prod/dca/DEPLOYMENT.md',
+    'Get Help': 'https://github.com/Familenko/DCA/blob/main/README.md',
     'Report a bug': "mailto:leshafamilenko@gmail.com",
-    'About': "This app allows you to backtest a DCA strategy with take-profit and cooldown features. Configure the settings in the sidebar and click 'Run backtest' to see the results. For more details, check the [GitHub README](https://github.com/Familenko/backtest)"
+    'About': "This app allows you to backtest a DCA strategy with take-profit and cooldown features. Configure the settings in the sidebar and click 'Run backtest' to see the results"
     }
 
 INSTRUCTIONS = """
