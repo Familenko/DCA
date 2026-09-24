@@ -8,8 +8,6 @@ import yaml
 from utils.mdd import max_drawdown
 from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
-from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc, sell_ppo
-from sell_decision.model_decision import SellModel, model_features
 from utils.validation import validation
 
 
@@ -81,18 +79,8 @@ class Configuration:
     cooldown_days: int
     cooldown_wait: int
     manual_sell_fraction: float
-    sell_fraction: dict
     enable_sell: bool
     enable_extra_buy: bool
-    enable_model: bool
-    threshold_invest_years: int
-    threshold_model_sell: float
-    threshold_ma200_sell: float
-    threshold_bolinger_sell: float
-    threshold_rsi_sell: float
-    threshold_roc_sell: float
-    threshold_ppo_sell: float
-    retrain_days: int
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -128,18 +116,6 @@ class BacktestDCA:
 
         # --- initialize state ---
         self.state = State()
-
-        # --- initialize model ---
-        self.model = None
-
-        if self.config.enable_model:
-            features_model = model_features(prices)
-            self.model = SellModel(
-                threshold=self.config.threshold_model_sell,
-                sell_fraction=self.config.sell_fraction['major'],
-                retrain_days=self.config.retrain_days,
-                features=features_model
-            )
 
         # --- initialize metrics and history ---
         self.metrics = None
@@ -206,60 +182,8 @@ class BacktestDCA:
         return False
 
     def decide_sell(self, date: pd.Timestamp):
-        if self.config.manual_sell_fraction:
-            sell_fraction = self.config.manual_sell_fraction
-            return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
-
-        # --- full sell ---
-        portfolio_sell = sell_portfolio(
-            portfolio_current=self.state.portfolio,
-            warmup_invest=self.config.warmup_invest,
-            threshold=self.config.threshold_invest_years,
-            sell_fraction=1.0
-        )
-
-        # --- major sell ---
-        ma200_sell = sell_ma200(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_ma200_sell,
-            sell_fraction=self.config.sell_fraction['major']
-            )
-
-        roc_sell = sell_roc(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_roc_sell,
-            sell_fraction=self.config.sell_fraction['major']
-        )
-
-        ppo_sell = sell_ppo(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_ppo_sell,
-            sell_fraction=self.config.sell_fraction['major']
-        )
-
-        # --- minor sell ---
-        bolinger_sell = sell_bolinger(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_bolinger_sell,
-            sell_fraction=self.config.sell_fraction['minor']
-        )
-
-        rsi_sell = sell_rsi(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_rsi_sell,
-            sell_fraction=self.config.sell_fraction['minor']
-        )
-
-        if self.model:
-            model_sell = self.model.predict(self.config.prices.loc[:date])
-        else:
-            model_sell = (0.0, "Model: N/A")
-
-        # --- agresive choise ---
-        signals = sorted([roc_sell, model_sell, ma200_sell, portfolio_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
-        sell_fraction, sell_msg = signals[-1]
-
-        return sell_fraction, sell_msg
+        sell_fraction = self.config.manual_sell_fraction
+        return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
 
     def run(self):
         for date, price in self.config.prices.items():
