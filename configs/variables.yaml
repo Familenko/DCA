@@ -22,7 +22,7 @@ default_params:
   enable_sell: true
   enable_extra_buy: true
 
-  enable_model: true
+  enable_model: false
   retrain_days: 30
 
   threshold_invest_years: 5.0

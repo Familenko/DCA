@@ -216,39 +216,39 @@ class BacktestDCA:
             warmup_invest=self.config.warmup_invest,
             threshold=self.config.threshold_invest_years,
             sell_fraction=1.0
-        ) if self.config.enable_portfolio else (0.0, "Limit: N/A")
+        )
 
         # --- major sell ---
         ma200_sell = sell_ma200(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_ma200_sell,
             sell_fraction=self.config.sell_fraction['major']
-            ) if self.config.enable_ma200 else (0.0, "MA200: N/A")
+            )
 
         roc_sell = sell_roc(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_roc_sell,
             sell_fraction=self.config.sell_fraction['major']
-        ) if self.config.enable_roc else (0.0, "ROC: N/A")
+        )
 
         ppo_sell = sell_ppo(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_ppo_sell,
             sell_fraction=self.config.sell_fraction['major']
-        ) if self.config.enable_ppo else (0.0, "PPO: N/A")
+        )
 
         # --- minor sell ---
         bolinger_sell = sell_bolinger(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_bolinger_sell,
             sell_fraction=self.config.sell_fraction['minor']
-        ) if self.config.enable_bolinger else (0.0, "BB: N/A")
+        )
 
         rsi_sell = sell_rsi(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_rsi_sell,
             sell_fraction=self.config.sell_fraction['minor']
-        ) if self.config.enable_rsi else (0.0, "RSI: N/A")
+        )
 
         if self.model:
             model_sell = self.model.predict(self.config.prices.loc[:date])
