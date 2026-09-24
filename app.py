@@ -7,8 +7,7 @@ import yaml
 
 from utils.mdd import max_drawdown
 from utils.survival_ma200 import survival_ma200
-from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc, sell_ppo
-from sell_decision.model_decision import SellModel, model_features
+from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_ppo
 from utils.validation import validation
 
 
@@ -83,15 +82,11 @@ class Configuration:
     sell_fraction: dict
     enable_sell: bool
     enable_extra_buy: bool
-    enable_model: bool
     threshold_invest_years: int
-    threshold_model_sell: float
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
     threshold_rsi_sell: float
-    threshold_roc_sell: float
     threshold_ppo_sell: float
-    retrain_days: int
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -127,18 +122,6 @@ class BacktestDCA:
 
         # --- initialize state ---
         self.state = State()
-
-        # --- initialize model ---
-        self.model = None
-
-        if self.config.enable_model:
-            features_model = model_features(prices)
-            self.model = SellModel(
-                threshold=self.config.threshold_model_sell,
-                sell_fraction=self.config.sell_fraction['major'],
-                retrain_days=self.config.retrain_days,
-                features=features_model
-            )
 
         # --- initialize metrics and history ---
         self.metrics = None
@@ -224,12 +207,6 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['major']
             )
 
-        roc_sell = sell_roc(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_roc_sell,
-            sell_fraction=self.config.sell_fraction['major']
-        )
-
         ppo_sell = sell_ppo(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_ppo_sell,
@@ -249,13 +226,8 @@ class BacktestDCA:
             sell_fraction=self.config.sell_fraction['minor']
         )
 
-        if self.model:
-            model_sell = self.model.predict(self.config.prices.loc[:date])
-        else:
-            model_sell = (0.0, "Model: N/A")
-
         # --- agresive choise ---
-        signals = sorted([roc_sell, model_sell, ma200_sell, portfolio_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
+        signals = sorted([ma200_sell, portfolio_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
         return sell_fraction, sell_msg
