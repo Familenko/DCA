@@ -21,7 +21,9 @@ default_params:
 
   enable_sell: true
   enable_extra_buy: true
+
   enable_model: true
+  retrain_days: 30
 
   threshold_invest_years: 5.0
   threshold_model_sell: 0.8
@@ -30,4 +32,3 @@ default_params:
   threshold_rsi_sell: 80.0
   threshold_roc_sell: 200.0
   threshold_ppo_sell: 10.0
-  retrain_days: 30
