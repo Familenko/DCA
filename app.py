@@ -85,12 +85,6 @@ class Configuration:
     enable_sell: bool
     enable_extra_buy: bool
     enable_model: bool
-    enable_ma200: bool
-    enable_bolinger: bool
-    enable_portfolio: bool
-    enable_rsi: bool
-    enable_roc: bool
-    enable_ppo: bool
     threshold_invest_years: int
     threshold_model_sell: float
     threshold_ma200_sell: float
@@ -312,7 +306,6 @@ class BacktestDCA:
         value = int(self.history["Value"].iloc[-1])
         profit = int(self.history["Profit"].sum())
         ma200_survival_days = survival_ma200(prices=self.config.prices)
-        bank_profit = complex_percent(returns=self.history["Returns"], rate=VARIABLES["banking_rate"])
         bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
         avg_price = self.history['Average_price'].iloc[-1]
         num_take_profits = int((self.history["Trigger_msg"] != "").sum())
@@ -332,6 +325,5 @@ class BacktestDCA:
             "Num_take_profits": num_take_profits,
             "MDD": mdd_pct,
             "MDD_usd": mdd_usd,
-            "Bank_profit": bank_profit,
             "MA200_survival_days": ma200_survival_days,
         }

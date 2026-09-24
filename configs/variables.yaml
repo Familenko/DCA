@@ -21,14 +21,8 @@ default_params:
 
   enable_sell: true
   enable_extra_buy: true
-
   enable_model: true
-  enable_ma200: true
-  enable_bolinger: true
-  enable_portfolio: true
-  enable_rsi: true
-  enable_roc: true
-  enable_ppo: true
+
   threshold_invest_years: 5.0
   threshold_model_sell: 0.8
   threshold_ma200_sell: 2.0
@@ -36,6 +30,4 @@ default_params:
   threshold_rsi_sell: 80.0
   threshold_roc_sell: 200.0
   threshold_ppo_sell: 10.0
-  retrain_days: 360
-
-banking_rate: 0.02
+  retrain_days: 30
