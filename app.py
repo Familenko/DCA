@@ -6,7 +6,6 @@ from functools import cached_property
 import yaml
 
 from utils.mdd import max_drawdown
-from utils.banking import complex_percent
 from utils.survival_ma200 import survival_ma200
 from sell_decision.analitic_decision import sell_ma200, sell_portfolio, sell_bolinger, sell_rsi, sell_roc, sell_ppo
 from sell_decision.model_decision import SellModel, model_features
