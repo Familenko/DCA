@@ -154,8 +154,17 @@ class BacktestDCA:
         return False   
 
     def decide_buy_amount(self, date: pd.Timestamp):
+        last_price = self.config.prices.loc[:date].iloc[-1]
+
+        trigger_msg = ""
         buy_amount = self.config.buy_amount * (1 - self.config.fee)
-        return buy_amount
+        below_portfolio = last_price < self.state.average_price * 0.5
+        if below_portfolio:
+            buy_amount = buy_amount * 10
+            nominal_amount = self.config.buy_amount * 10
+            trigger_msg = f"Buy: {nominal_amount:.2f}$"
+
+        return buy_amount, trigger_msg
 
     def sell(self, date: float, sell_fraction: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
@@ -233,14 +242,14 @@ class BacktestDCA:
 
             # --- DCA buy ---
             if self.decide_buy_time(date=date):
-                buy_amount = self.decide_buy_amount(date=date)
+                buy_amount, buy_msg = self.decide_buy_amount(date=date)
                 if buy_amount > 0:
                     self.buy(date=date, buy_amount=buy_amount)
+                    self.state.trigger_msg = buy_msg
 
             # --- decide and execute sell ---
             if self.decide_sell_time():
                 self.cooldown = self.config.cooldown_wait
-
                 sell_fraction, sell_msg = self.decide_sell_amount(date=date)
                 if sell_fraction > 0:
                     self.sell(date=date, sell_fraction=sell_fraction)
