@@ -3,30 +3,6 @@ import numpy as np
 import ta
 
 
-def sell_portfolio(portfolio_current: int,
-                    warmup_invest: int = 1000,
-                    threshold: float = 3.0,
-                    sell_fraction: float = 1.0) -> tuple[float, str]:
-    """
-    Продає частину портфелю пропорційно до перевищення ліміту інвестицій.
-
-    Параметри:
-    - prices: серія цін
-    - portfolio_current: поточна вартість портфелю
-    - warmup_invest: сума портфелю, яку ми вважаємо "оптимальною" після періоду розігріву
-    - threshold: поріг для визначення перевищення ліміту інвестицій
-    - sell_fraction: фракція портфелю для продажу
-    """
-
-    threshold_portfolio = warmup_invest * threshold
-    overvalue = portfolio_current > threshold_portfolio
-
-    if overvalue:
-        return sell_fraction, f"Limit: {int(portfolio_current)}$ [-{sell_fraction:.0%}]"
-         
-    return 0.0, "Wait"
-
-
 def sell_ma200(prices: pd.Series,
                threshold: float = 2.0,
                sell_fraction: float = 0.5) -> tuple[float, str]:
