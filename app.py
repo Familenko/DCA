@@ -127,7 +127,6 @@ class BacktestDCA:
 
         # --- initialize indicators ---
         self.cooldown = self.config.cooldown_wait
-        self.active_buy = True
 
     def buy(self, date: float, buy_amount: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
@@ -142,7 +141,7 @@ class BacktestDCA:
         self.state.cash_spent += buy_amount
 
     def decide_buy_time(self, date: pd.Timestamp):
-        if date in self.config.buy_dates and self.active_buy:
+        if date in self.config.buy_dates:
             return True
 
         return False
@@ -250,7 +249,6 @@ class BacktestDCA:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     self.cooldown = self.config.cooldown_days
-                    self.active_buy = False if sell_fraction == 1.0 else True
 
             # --- record history ---
             self.state.update_history()
