@@ -10,19 +10,19 @@ default_params:
 
   minimum_profit: 1.2
 
-  cooldown_wait: 7
-  cooldown_days: 30
+  cooldown_wait: 90
+  cooldown_days: 14
 
   sell_fraction:
     manual: null
-    minor: 0.25
+    minor: 0.1
     major: 0.5
 
   enable_sell: true
-  enable_buy: false
+  enable_buy: true
 
   threshold_invest_years: 5.0
   threshold_ma200_sell: 2.0
-  threshold_bolinger_sell: 2.5
-  threshold_rsi_sell: 80.0
+  threshold_bolinger_sell: 2
+  threshold_rsi_sell: 75.0
   threshold_ppo_sell: 10.0
