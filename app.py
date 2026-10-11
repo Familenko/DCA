@@ -273,8 +273,6 @@ class BacktestDCA:
         portfolio = int(self.history["Portfolio"].iloc[-1])
         extra_cash = int(self.history["Extra_cash"].iloc[-1])
         value = int(self.history["Value"].iloc[-1])
-        profit = int(self.history["Profit"].sum())
-        cash_return = int(self.history["Returns"].sum())
         
         ma200_survival_days = survival_ma200(prices=self.config.prices)
         bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
@@ -286,11 +284,9 @@ class BacktestDCA:
         return {
             "Target": self.config.target,
             "Cash_spent": cash_spent,
-            "Cash_return": cash_return,
-            "Extra_cash": extra_cash,
+            "Cash_return": extra_cash,
             "Portfolio": portfolio,
             "Value": value,
-            "Profit": profit,
             "Bull_history": bull_history,
             "Avg_price": avg_price,
             "Num_take_profits": num_take_profits,
