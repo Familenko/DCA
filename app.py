@@ -141,23 +141,20 @@ class BacktestDCA:
         self.state.cash_spent += buy_amount
 
     def decide_buy_time(self, date: pd.Timestamp):
-        if date in self.config.buy_dates:
-            return True
-
-        return False
-
-    def decide_buy_amount(self, date: pd.Timestamp):
         last_price = self.config.prices.loc[:date].iloc[-1]
-        ma30 = self.config.prices.loc[:date].iloc[-200:].mean()
 
-        below_ma = last_price < ma30
+        ma = self.config.prices.loc[:date].iloc[-200:].mean()
+        below_ma = last_price < ma
         not_enough_data = len(self.config.prices.loc[:date]) < 200
         enable_buy = self.config.enable_buy
-        if below_ma or not_enough_data or enable_buy:
-            buy_amount = self.config.buy_amount * (1 - self.config.fee)
-        else:
-            buy_amount = 0.0
+        date_for_buy = date in self.config.buy_dates
+        if (below_ma or not_enough_data or enable_buy) and date_for_buy:
+            return True
 
+        return False   
+
+    def decide_buy_amount(self, date: pd.Timestamp):
+        buy_amount = self.config.buy_amount * (1 - self.config.fee)
         return buy_amount
 
     def sell(self, date: float, sell_fraction: float):
