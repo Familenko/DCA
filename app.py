@@ -25,7 +25,7 @@ class State:
     cash_spent: float = 0.0
     profit: float = 0.0
     returns: float = 0.0
-    extra_cash: float = 0.0
+    realized_cash: float = 0.0
     trigger_msg: str = ""
     history: dict = field(default_factory=dict)
 
@@ -43,7 +43,7 @@ class State:
 
     @property
     def value(self) -> float:
-        return self.portfolio + self.extra_cash
+        return self.portfolio + self.realized_cash
     
     def clear_day(self):
         self.profit = 0.0
@@ -59,7 +59,7 @@ class State:
             "Cash_spent": self.cash_spent,
             "Profit": self.profit,
             "Returns": self.returns,
-            "Extra_cash": self.extra_cash,
+            "Realized_cash": self.realized_cash,
             "Trigger_msg": self.trigger_msg,
             "Portfolio": self.portfolio,
             "Baseline": self.baseline,
@@ -179,7 +179,7 @@ class BacktestDCA:
         # metric only for sell
         self.state.profit += sell_returns - sell_basis
         self.state.returns += sell_returns
-        self.state.extra_cash += sell_returns
+        self.state.realized_cash += sell_returns
 
     def decide_sell_time(self):
         enaugh_waited = self.cooldown == 0
@@ -271,7 +271,7 @@ class BacktestDCA:
     def calculate_metrics(self):
         cash_spent = int(self.history["Cash_spent"].iloc[-1])
         portfolio = int(self.history["Portfolio"].iloc[-1])
-        extra_cash = int(self.history["Extra_cash"].iloc[-1])
+        realized_cash = int(self.history["Realized_cash"].iloc[-1])
         value = int(self.history["Value"].iloc[-1])
         
         ma200_survival_days = survival_ma200(prices=self.config.prices)
@@ -284,7 +284,7 @@ class BacktestDCA:
         return {
             "Target": self.config.target,
             "Cash_spent": cash_spent,
-            "Cash_return": extra_cash,
+            "Realized_cash": realized_cash,
             "Portfolio": portfolio,
             "Value": value,
             "Bull_history": bull_history,
