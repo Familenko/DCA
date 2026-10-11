@@ -82,7 +82,6 @@ class Configuration:
     manual_sell_fraction: float
     sell_fraction: dict
     enable_sell: bool
-    enable_extra_buy: bool
     threshold_invest_years: int
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
@@ -154,22 +153,6 @@ class BacktestDCA:
         buy_amount = self.config.buy_amount * (1 - self.config.fee)
 
         return buy_amount
-
-    def buy_extra(self, date: float):
-        last_price = self.config.prices.loc[:date].iloc[-1]
-
-        avg_price = self.state.average_price
-        loss_threshold = self.config.minimum_loss
-        good_price = last_price < (avg_price * loss_threshold)
-        if good_price and self.state.extra_cash > 0:
-            self.state.trigger_msg = f"Buy: {self.state.extra_cash:,.0f} (price: {last_price:.2f})"
-
-            effective_amount = self.state.extra_cash * (1 - self.config.fee)
-            buy_qty = effective_amount / last_price
-
-            self.state.portfolio_qty += buy_qty
-            self.state.cost_basis += self.state.extra_cash
-            self.state.extra_cash = 0.0
 
     def sell(self, date: float, sell_fraction: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
@@ -255,10 +238,8 @@ class BacktestDCA:
             # --- DCA buy ---
             if self.decide_buy_time(date=date):
                 buy_amount = self.decide_buy_amount(date=date)
-                self.buy(date=date, buy_amount=buy_amount)
-
-                if self.config.enable_extra_buy:
-                    self.buy_extra(date=date)
+                if buy_amount > 0:
+                    self.buy(date=date, buy_amount=buy_amount)
 
             # --- decide and execute sell ---
             if self.decide_sell_time():
