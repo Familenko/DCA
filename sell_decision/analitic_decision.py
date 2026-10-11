@@ -7,7 +7,7 @@ def sell_ma200(prices: pd.Series,
                threshold: float = 2.0,
                sell_fraction: float = 0.5) -> tuple[float, str]:
     """
-    Продає частину портфелю пропорційно до відхилення ціни від 200-денної MA.
+    Продає частину портфелю, якщо ціна виходить за верхню межу 200-денної MA.
 
     Параметри:
     - prices: серія цін
@@ -31,7 +31,7 @@ def sell_bolinger(prices: pd.Series,
                     sell_fraction: float = 0.25) -> tuple[float, str]:
 
     """
-    Продає частину портфелю, якщо ціна виходить за верхню межу Болінджера
+    Продає частину портфелю, якщо ціна виходить за верхню межу Болінджера.
     """
 
     bb = ta.volatility.BollingerBands(close=prices, window=k, window_dev=threshold)
@@ -50,7 +50,7 @@ def sell_rsi(prices: pd.Series,
              threshold: float = 80.0,
              sell_fraction: float = 0.25) -> tuple[float, str]:
     """
-    Продає частину портфелю пропорційно до відхилення RSI від нейтральної зони 50
+    Продає частину портфелю, якщо RSI виходить за верхню межу.
 
     Параметри:
     - prices: серія цін
@@ -70,8 +70,7 @@ def sell_ppo(prices: pd.Series,
              threshold: float = 5.0,
              sell_fraction: float = 0.25) -> tuple[float, str]:
     """
-    Продає частину портфелю, якщо PPO (MACD у %) вище порогу —
-    momentum прискорюється сильніше, ніж на threshold% від ціни.
+    Продає частину портфелю, якщо PPO виходить за верхню межу.
     """
     ppo_ind = ta.momentum.PercentagePriceOscillator(close=prices)
     last_ppo = ppo_ind.ppo().iloc[-1]
