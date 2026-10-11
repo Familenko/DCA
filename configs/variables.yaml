@@ -9,7 +9,6 @@ default_params:
   fee: 0.01
 
   minimum_profit: 1.2
-  minimum_loss: 0.8
 
   cooldown_wait: 7
   cooldown_days: 30

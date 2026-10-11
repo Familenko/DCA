@@ -76,7 +76,6 @@ class Configuration:
     freq: str
     fee: float
     minimum_profit: float
-    minimum_loss: float
     cooldown_days: int
     cooldown_wait: int
     sell_fraction: dict
