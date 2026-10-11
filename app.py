@@ -81,7 +81,6 @@ class Configuration:
     sell_fraction: dict
     enable_sell: bool
     enable_buy: bool
-    threshold_invest_years: int
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
     threshold_rsi_sell: float
@@ -191,17 +190,10 @@ class BacktestDCA:
         return False
 
     def decide_sell_amount(self, date: pd.Timestamp):
+        # --- manual sell ---
         if self.config.sell_fraction['manual']:
             sell_fraction = self.config.sell_fraction['manual']
             return sell_fraction, f"Fixed: {self.config.sell_fraction['manual'] * 100:.0f}%"
-
-        # --- full sell ---
-        portfolio_sell = sell_portfolio(
-            portfolio_current=self.state.portfolio,
-            warmup_invest=self.config.warmup_invest,
-            threshold=self.config.threshold_invest_years,
-            sell_fraction=1.0
-        )
 
         # --- major sell ---
         ma200_sell = sell_ma200(
@@ -230,7 +222,7 @@ class BacktestDCA:
         )
 
         # --- agresive choise ---
-        signals = sorted([ma200_sell, portfolio_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
+        signals = sorted([ma200_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
         return sell_fraction, sell_msg

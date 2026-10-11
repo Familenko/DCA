@@ -8,9 +8,9 @@ default_params:
   freq: "W-MON"
   fee: 0.01
 
-  minimum_profit: 1.2
+  minimum_profit: 1.1
 
-  cooldown_wait: 90
+  cooldown_wait: 60
   cooldown_days: 14
 
   sell_fraction:
@@ -21,7 +21,6 @@ default_params:
   enable_sell: true
   enable_buy: true
 
-  threshold_invest_years: 5.0
   threshold_ma200_sell: 2.0
   threshold_bolinger_sell: 2
   threshold_rsi_sell: 75.0
