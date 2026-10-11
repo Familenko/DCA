@@ -132,18 +132,28 @@ class BacktestDCA:
         self.cooldown = self.config.cooldown_wait
         self.active_buy = True
 
-    def buy(self, date: float):
+    def buy(self, date: float, buy_amount: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
 
-        effective_amount = self.config.buy_amount * (1 - self.config.fee)
-        buy_qty = effective_amount / last_price
+        buy_qty = buy_amount / last_price
 
         self.state.portfolio_qty += buy_qty
         self.state.baseline_qty += buy_qty
-        self.state.cost_basis += self.config.buy_amount
+        self.state.cost_basis += buy_amount
 
         # metric only for buy
-        self.state.cash_spent += self.config.buy_amount
+        self.state.cash_spent += buy_amount
+
+    def decide_buy_time(self, date: pd.Timestamp):
+        if date in self.config.buy_dates and self.active_buy:
+            return True
+
+        return False
+
+    def decide_buy_amount(self, date: pd.Timestamp):
+        buy_amount = self.config.buy_amount * (1 - self.config.fee)
+
+        return buy_amount
 
     def buy_extra(self, date: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
@@ -182,8 +192,9 @@ class BacktestDCA:
         profit_threshold = self.config.minimum_profit
         upper_limit = self.state.portfolio > self.config.warmup_invest
         profit_sell = self.state.portfolio > profit_threshold * self.state.cost_basis
+        enable_sell = self.config.enable_sell
 
-        if enaugh_waited and have_liquidity and upper_limit and profit_sell:
+        if enaugh_waited and have_liquidity and upper_limit and profit_sell and enable_sell:
             return True
             
         return False
@@ -242,14 +253,15 @@ class BacktestDCA:
                 self.cooldown -= 1
 
             # --- DCA buy ---
-            if date in self.config.buy_dates and self.active_buy:
-                self.buy(date=date)
+            if self.decide_buy_time(date=date):
+                buy_amount = self.decide_buy_amount(date=date)
+                self.buy(date=date, buy_amount=buy_amount)
 
                 if self.config.enable_extra_buy:
                     self.buy_extra(date=date)
 
             # --- decide and execute sell ---
-            if self.decide_sell_time() and self.config.enable_sell:
+            if self.decide_sell_time():
                 self.cooldown = self.config.cooldown_wait
 
                 sell_fraction, sell_msg = self.decide_sell_amount(date=date)
