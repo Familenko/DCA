@@ -79,7 +79,6 @@ class Configuration:
     minimum_loss: float
     cooldown_days: int
     cooldown_wait: int
-    manual_sell_fraction: float
     sell_fraction: dict
     enable_sell: bool
     threshold_invest_years: int
@@ -183,9 +182,9 @@ class BacktestDCA:
         return False
 
     def decide_sell_amount(self, date: pd.Timestamp):
-        if self.config.manual_sell_fraction:
-            sell_fraction = self.config.manual_sell_fraction
-            return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
+        if self.config.sell_fraction['manual']:
+            sell_fraction = self.config.sell_fraction['manual']
+            return sell_fraction, f"Fixed: {self.config.sell_fraction['manual'] * 100:.0f}%"
 
         # --- full sell ---
         portfolio_sell = sell_portfolio(

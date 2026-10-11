@@ -14,8 +14,8 @@ default_params:
   cooldown_wait: 7
   cooldown_days: 30
 
-  manual_sell_fraction: null
   sell_fraction:
+    manual: null
     minor: 0.25
     major: 0.5
 
