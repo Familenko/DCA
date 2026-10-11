@@ -19,6 +19,7 @@ default_params:
     major: 0.5
 
   enable_sell: true
+  enable_buy: false
 
   threshold_invest_years: 5.0
   threshold_ma200_sell: 2.0

@@ -80,6 +80,7 @@ class Configuration:
     cooldown_wait: int
     sell_fraction: dict
     enable_sell: bool
+    enable_buy: bool
     threshold_invest_years: int
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
@@ -148,7 +149,16 @@ class BacktestDCA:
         return False
 
     def decide_buy_amount(self, date: pd.Timestamp):
-        buy_amount = self.config.buy_amount * (1 - self.config.fee)
+        last_price = self.config.prices.loc[:date].iloc[-1]
+        ma30 = self.config.prices.loc[:date].iloc[-7:].mean()
+
+        below_ma = last_price < ma30
+        not_enough_data = len(self.config.prices.loc[:date]) < 7
+        enable_buy = self.config.enable_buy
+        if below_ma or not_enough_data or enable_buy:
+            buy_amount = self.config.buy_amount * (1 - self.config.fee)
+        else:
+            buy_amount = 0.0
 
         return buy_amount
 
