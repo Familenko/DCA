@@ -19,7 +19,7 @@ with open("configs/variables.yaml", "r", encoding="utf-8") as f:
 class State:
     date: pd.Timestamp = None
     price: float = 0.0
-    qty: float = 0.0
+    portfolio_qty: float = 0.0
     baseline_qty: float = 0.0
     cost_basis: float = 0.0
     cash_spent: float = 0.0
@@ -31,7 +31,7 @@ class State:
 
     @property
     def portfolio(self) -> float:
-        return self.price * self.qty
+        return self.price * self.portfolio_qty
 
     @property
     def baseline(self) -> float:
@@ -39,7 +39,7 @@ class State:
     
     @property
     def average_price(self) -> float:
-        return self.cost_basis / self.qty if self.qty > 0 else np.nan
+        return self.cost_basis / self.portfolio_qty if self.portfolio_qty > 0 else np.nan
 
     @property
     def value(self) -> float:
@@ -53,7 +53,8 @@ class State:
     def update_history(self):
         self.history[self.date] = {
             "Price": self.price,
-            "Qty": self.qty,
+            "Portfolio_qty": self.portfolio_qty,
+            "Baseline_qty": self.baseline_qty,
             "Cost_basis": self.cost_basis,
             "Cash_spent": self.cash_spent,
             "Profit": self.profit,
@@ -131,13 +132,13 @@ class BacktestDCA:
         self.cooldown = self.config.cooldown_wait
         self.active_buy = True
 
-    def buy_regular(self, date: float):
+    def buy(self, date: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
 
         effective_amount = self.config.buy_amount * (1 - self.config.fee)
         buy_qty = effective_amount / last_price
 
-        self.state.qty += buy_qty
+        self.state.portfolio_qty += buy_qty
         self.state.baseline_qty += buy_qty
         self.state.cost_basis += self.config.buy_amount
 
@@ -156,18 +157,18 @@ class BacktestDCA:
             effective_amount = self.state.extra_cash * (1 - self.config.fee)
             buy_qty = effective_amount / last_price
 
-            self.state.qty += buy_qty
+            self.state.portfolio_qty += buy_qty
             self.state.cost_basis += self.state.extra_cash
             self.state.extra_cash = 0.0
 
     def sell(self, date: float, sell_fraction: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
         
-        sell_qty = self.state.qty * sell_fraction
+        sell_qty = self.state.portfolio_qty * sell_fraction
         sell_basis = self.state.cost_basis * sell_fraction
         sell_returns = sell_qty * last_price * (1 - self.config.fee)
 
-        self.state.qty -= sell_qty
+        self.state.portfolio_qty -= sell_qty
         self.state.cost_basis -= sell_basis
 
         # metric only for sell
@@ -175,9 +176,9 @@ class BacktestDCA:
         self.state.returns += sell_returns
         self.state.extra_cash += sell_returns
 
-    def decide_time(self):
+    def decide_sell_time(self):
         enaugh_waited = self.cooldown == 0
-        have_liquidity = self.state.qty > 0
+        have_liquidity = self.state.portfolio_qty > 0
         profit_threshold = self.config.minimum_profit
         upper_limit = self.state.portfolio > self.config.warmup_invest
         profit_sell = self.state.portfolio > profit_threshold * self.state.cost_basis
@@ -187,7 +188,7 @@ class BacktestDCA:
             
         return False
 
-    def decide_sell(self, date: pd.Timestamp):
+    def decide_sell_amount(self, date: pd.Timestamp):
         if self.config.manual_sell_fraction:
             sell_fraction = self.config.manual_sell_fraction
             return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
@@ -242,16 +243,16 @@ class BacktestDCA:
 
             # --- DCA buy ---
             if date in self.config.buy_dates and self.active_buy:
-                self.buy_regular(date=date)
+                self.buy(date=date)
 
                 if self.config.enable_extra_buy:
                     self.buy_extra(date=date)
 
             # --- decide and execute sell ---
-            if self.decide_time() and self.config.enable_sell:
+            if self.decide_sell_time() and self.config.enable_sell:
                 self.cooldown = self.config.cooldown_wait
 
-                sell_fraction, sell_msg = self.decide_sell(date=date)
+                sell_fraction, sell_msg = self.decide_sell_amount(date=date)
                 if sell_fraction > 0:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
