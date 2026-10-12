@@ -5,22 +5,24 @@ freq_multiplier:
 
 default_params:
   buy_amount: 10.0
+  extra_buy_amount: 100.0
+  
   freq: "W-MON"
   fee: 0.01
 
   minimum_profit: 1.1
+  minimum_loss: 0.5
 
   buy_embargo: 30
-
   cooldown_long: 60
   cooldown_short: 14
 
+  classic_dca: false
   manual_sell_fraction: null
+
   auto_sell_fraction:
     minor: 0.1
     major: 0.5
-
-  classic_dca: false
 
   threshold_ma200_sell: 2.0
   threshold_bolinger_sell: 2

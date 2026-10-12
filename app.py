@@ -66,9 +66,11 @@ class Configuration:
     target: str
     prices: pd.Series
     buy_amount: float
+    extra_buy_amount: float
     freq: str
     fee: float
     minimum_profit: float
+    minimum_loss: float
     cooldown_short: int
     cooldown_long: int
     buy_embargo: int
@@ -148,12 +150,11 @@ class BacktestDCA:
 
         trigger_msg = ""
         buy_amount = self.config.buy_amount * (1 - self.config.fee)
-        below_portfolio = last_price < self.state.average_price * 0.5
+        below_portfolio = last_price < self.state.average_price * self.config.minimum_loss
         classic_dca = self.config.classic_dca
         if below_portfolio and not classic_dca:
-            buy_amount = buy_amount * 10
-            nominal_amount = self.config.buy_amount * 10
-            trigger_msg = f"Buy: {nominal_amount:.2f}$"
+            buy_amount = self.config.extra_buy_amount * (1 - self.config.fee)
+            trigger_msg = f"Buy: {self.config.extra_buy_amount:.0f}$"
             self.embargo = self.config.buy_embargo
 
         return buy_amount, trigger_msg
