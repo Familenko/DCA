@@ -58,22 +58,12 @@ def plot_price(ax_price, history):
     )
 
 
-def plot_baseline(ax_bottom, history):
-    ax_bottom.plot(
-        history.index,
-        history["Baseline"],
-        color="red",
-        label="Baseline",
-        alpha=0.25
-    )
-
-
 def plot_value(ax_bottom, history):
     ax_bottom.plot(
         history.index,
         history["Value"],
         color="green",
-        label="Algorithm ($)",
+        label="Total value ($)",
         alpha=0.25,
     )
 
@@ -237,6 +227,7 @@ def ploter(metrics, history, return_fig: bool = False):
 
     plot_portfolio(ax_bottom, history)
     plot_invested(ax_bottom, history)
+    plot_value(ax_bottom, history)
 
     # --- settings ---
     ax_price.set_ylabel("Asset price ($)")
