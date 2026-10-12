@@ -194,11 +194,19 @@ def last_sale_info(history):
     return last_sale_text
 
 
-def title_with_metrics(metrics, last_sale_text):
-    plt.title(f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Value: {metrics['Value']}\\$" +
-                f"\n Portfolio: {metrics['Portfolio']}\\$ | Realized_cash: {metrics['Realized_cash']}\\$" +
-                f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d" +
-                f"\n {last_sale_text}")
+def title_with_metrics(ax_price, metrics, last_sale_text):
+    title = (
+        f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Value: {metrics['Value']}\\$"
+        f"\n Portfolio: {metrics['Portfolio']}\\$ | Realized_cash: {metrics['Realized_cash']}\\$"
+        f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d"
+        f"\n {last_sale_text}"
+    )
+    ax_price.text(
+        0.5, 0.98, title,
+        transform=ax_price.transAxes,
+        ha="center", va="top",
+        fontsize=10,
+    )
 
 
 def ploter(metrics, history, return_fig: bool = False):
@@ -213,23 +221,14 @@ def ploter(metrics, history, return_fig: bool = False):
     plot_changepoints(ax_price, history)
     plot_average_price(ax_price, history)
     plot_ma200(ax_price, history)
-
-    portfolio_invested = ax_price.twinx()
-    plot_portfolio(portfolio_invested, history)
-    plot_invested(portfolio_invested, history)
-
     plot_take_profit(ax_price, history)
 
-    plot_value(ax_bottom, history)
-    # plot_baseline(ax_bottom, history)
-
-    last_sale_text = last_sale_info(history)
-    title_with_metrics(metrics, last_sale_text)
+    plot_portfolio(ax_bottom, history)
+    plot_invested(ax_bottom, history)
 
     # --- settings ---
-    portfolio_invested.set_ylabel("Portfolio / Invested ($)")
     ax_price.set_ylabel("Asset price ($)")
-    ax_bottom.set_ylabel("Baseline / Algorithm ($)")
+    ax_bottom.set_ylabel("Portfolio / Invested ($)")
     ax_bottom.set_xlabel("Date")
     ax_bottom.grid(True, linestyle="--", alpha=0.5)
 
@@ -237,11 +236,12 @@ def ploter(metrics, history, return_fig: bool = False):
     y_max = history["Price"].max()
     ax_price.set_ylim(y_min * 0.95, y_max * 1.20)
 
+    last_sale_text = last_sale_info(history)
+    title_with_metrics(ax_price, metrics, last_sale_text)
+
     # --- legend ---
-    l1, lab1 = ax_price.get_legend_handles_labels()
-    l2, lab2 = portfolio_invested.get_legend_handles_labels()
-    l3, lab3 = ax_bottom.get_legend_handles_labels()
-    ax_price.legend(l1 + l2 + l3, lab1 + lab2 + lab3, loc="upper left")
+    ax_price.legend(loc="upper left")
+    ax_bottom.legend(loc="upper left")
 
     plt.tight_layout()
 
