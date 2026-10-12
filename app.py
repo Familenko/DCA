@@ -7,6 +7,7 @@ import yaml
 
 from utils.mdd import max_drawdown
 from utils.survival_ma200 import survival_ma200
+from utils.roac import return_on_avg_capital
 from utils.sell_decision import sell_ma200, sell_bolinger, sell_rsi, sell_ppo
 from utils.validation import validation
 
@@ -283,7 +284,10 @@ class BacktestDCA:
         num_take_profits = int((self.history["Trigger_msg"] != "").sum())
         mdd_pct, mdd_usd = max_drawdown(portfolio_value=self.history["Portfolio"],
                                          realized_returns=np.cumsum(self.history["Returns"]))
-        
+        roac = return_on_avg_capital(total_value=total_value,
+                                     cash_spent=cash_spent,
+                                     avg_capital=self.history["Cost_basis"].mean())
+
         return {
             "Target": self.config.target,
             "Cash_spent": cash_spent,
@@ -296,4 +300,5 @@ class BacktestDCA:
             "MDD": mdd_pct,
             "MDD_usd": mdd_usd,
             "MA200_survival_days": ma200_survival_days,
+            "RoAC": roac,
         }
