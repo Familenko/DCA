@@ -111,15 +111,27 @@ def plot_average_price(ax_price, history):
 
 
 def plot_ma200(ax_price, history):
-    ma200 = history["Price"].rolling(200).mean()
-    ax_price.plot(
-        history.index,
-        ma200,
-        color="black",
-        linestyle="--",
-        linewidth=1.0,
-        alpha=0.5,
-        label="200-day MA",
+    price = history["Price"]
+    ma200 = price.rolling(200).mean()
+    valid = ma200.notna()
+    y_top = price.max() * 1.20
+    y_bot = price.min() * 0.95
+
+    ax_price.fill_between(
+        history.index[valid],
+        ma200[valid],
+        y_top,
+        color="green",
+        alpha=0.05,
+        label="Above MA200",
+    )
+    ax_price.fill_between(
+        history.index[valid],
+        y_bot,
+        ma200[valid],
+        color="red",
+        alpha=0.05,
+        label="Below MA200",
     )
 
 
