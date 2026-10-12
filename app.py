@@ -78,6 +78,7 @@ class Configuration:
     minimum_profit: float
     cooldown_short: int
     cooldown_long: int
+    buy_embargo: int
     manual_sell_fraction: float | None
     auto_sell_fraction: dict
     enable_sell: bool
@@ -128,6 +129,7 @@ class BacktestDCA:
 
         # --- initialize indicators ---
         self.cooldown = self.config.cooldown_long
+        self.embargo = self.config.buy_embargo
 
     def buy(self, date: float, buy_amount: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
@@ -149,7 +151,8 @@ class BacktestDCA:
         not_enough_data = len(self.config.prices.loc[:date]) < 200
         enable_buy = self.config.enable_buy
         date_for_buy = date in self.config.buy_dates
-        if (below_ma or not_enough_data or enable_buy) and date_for_buy:
+        embargo_passed = self.embargo == 0
+        if (below_ma or not_enough_data or enable_buy) and date_for_buy and embargo_passed:
             return True
 
         return False   
@@ -164,6 +167,7 @@ class BacktestDCA:
             buy_amount = buy_amount * 10
             nominal_amount = self.config.buy_amount * 10
             trigger_msg = f"Buy: {nominal_amount:.2f}$"
+            self.embargo = self.config.buy_embargo
 
         return buy_amount, trigger_msg
 
@@ -240,6 +244,9 @@ class BacktestDCA:
 
             if self.cooldown > 0:
                 self.cooldown -= 1
+
+            if self.embargo > 0:
+                self.embargo -= 1
 
             # --- DCA buy ---
             if self.decide_buy_time(date=date):

@@ -10,6 +10,8 @@ default_params:
 
   minimum_profit: 1.1
 
+  buy_embargo: 30
+
   cooldown_long: 60
   cooldown_short: 14
 
