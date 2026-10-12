@@ -37,12 +37,12 @@ def check_fee(fee: float):
         raise ValueError("fee must be between 0 and 1")
     
     
-def check_cooldown(cooldown_days: int, cooldown_wait: int):
-    if cooldown_days not in range(1, 366):
-        raise ValueError("cooldown_days must be between 1 and 365")
+def check_cooldown(cooldown_long: int, cooldown_short: int):
+    if cooldown_long not in range(1, 366):
+        raise ValueError("cooldown_long must be between 1 and 365")
 
-    if cooldown_wait not in range(1, 366):
-        raise ValueError("cooldown_wait must be between 1 and 365")
+    if cooldown_short not in range(1, 366):
+        raise ValueError("cooldown_short must be between 1 and 365")
 
 
 def validation(self, variables):
@@ -50,4 +50,4 @@ def validation(self, variables):
     check_buy_amount(self.buy_amount)
     check_freq(self.freq, variables["freq_multiplier"])
     check_fee(self.fee)
-    check_cooldown(self.cooldown_days, self.cooldown_wait)
+    check_cooldown(self.cooldown_long, self.cooldown_short)

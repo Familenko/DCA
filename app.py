@@ -76,8 +76,8 @@ class Configuration:
     freq: str
     fee: float
     minimum_profit: float
-    cooldown_days: int
-    cooldown_wait: int
+    cooldown_short: int
+    cooldown_long: int
     sell_fraction: dict
     enable_sell: bool
     enable_buy: bool
@@ -126,7 +126,7 @@ class BacktestDCA:
         self.history = None
 
         # --- initialize indicators ---
-        self.cooldown = self.config.cooldown_wait
+        self.cooldown = self.config.cooldown_long
 
     def buy(self, date: float, buy_amount: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
@@ -249,12 +249,12 @@ class BacktestDCA:
 
             # --- decide and execute sell ---
             if self.decide_sell_time():
-                self.cooldown = self.config.cooldown_wait
+                self.cooldown = self.config.cooldown_long
                 sell_fraction, sell_msg = self.decide_sell_amount(date=date)
                 if sell_fraction > 0:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
-                    self.cooldown = self.config.cooldown_days
+                    self.cooldown = self.config.cooldown_short
 
             # --- record history ---
             self.state.update_history()

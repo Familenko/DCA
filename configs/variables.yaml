@@ -10,8 +10,8 @@ default_params:
 
   minimum_profit: 1.1
 
-  cooldown_wait: 60
-  cooldown_days: 14
+  cooldown_long: 60
+  cooldown_short: 14
 
   sell_fraction:
     manual: null
