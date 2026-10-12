@@ -37,7 +37,7 @@ class State:
         return self.cost_basis / self.portfolio_qty if self.portfolio_qty > 0 else np.nan
 
     @property
-    def value(self) -> float:
+    def total_value(self) -> float:
         return self.portfolio + self.realized_cash
     
     def clear_day(self):
@@ -57,7 +57,7 @@ class State:
             "Trigger_msg": self.trigger_msg,
             "Portfolio": self.portfolio,
             "Average_price": self.average_price,
-            "Value": self.value
+            "Total_value": self.total_value
         }
 
 
@@ -274,7 +274,7 @@ class BacktestDCA:
         cash_spent = int(self.history["Cash_spent"].iloc[-1])
         portfolio = int(self.history["Portfolio"].iloc[-1])
         realized_cash = int(self.history["Realized_cash"].iloc[-1])
-        value = int(self.history["Value"].iloc[-1])
+        total_value = int(self.history["Total_value"].iloc[-1])
         
         ma200_survival_days = survival_ma200(prices=self.config.prices)
         bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
@@ -288,7 +288,7 @@ class BacktestDCA:
             "Cash_spent": cash_spent,
             "Realized_cash": realized_cash,
             "Portfolio": portfolio,
-            "Value": value,
+            "Total_value": total_value,
             "Bull_history": bull_history,
             "Avg_price": avg_price,
             "Num_take_profits": num_take_profits,

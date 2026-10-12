@@ -61,7 +61,7 @@ def plot_price(ax_price, history):
 def plot_value(ax_bottom, history):
     ax_bottom.plot(
         history.index,
-        history["Value"],
+        history["Total_value"],
         color="green",
         label="Total value ($)",
         alpha=0.25,
@@ -198,7 +198,7 @@ def last_sale_info(history):
 
 def title_with_metrics(ax_price, metrics, last_sale_text):
     title = (
-        f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Value: {metrics['Value']}\\$"
+        f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Total_value: {metrics['Total_value']}\\$"
         f"\n Portfolio: {metrics['Portfolio']}\\$ | Realized_cash: {metrics['Realized_cash']}\\$"
         f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d"
         f"\n {last_sale_text}"
