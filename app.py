@@ -7,7 +7,7 @@ import yaml
 
 from utils.mdd import max_drawdown
 from utils.survival_ma200 import survival_ma200
-from utils.sell_decision import sell_ma200, sell_bolinger, sell_rsi, sell_ppo, sell_portfolio
+from utils.sell_decision import sell_ma200, sell_bolinger, sell_rsi, sell_ppo
 from utils.validation import validation
 
 
@@ -81,7 +81,6 @@ class Configuration:
     threshold_bolinger_sell: float
     threshold_rsi_sell: float
     threshold_ppo_sell: float
-    threshold_portfolio_sell: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -220,15 +219,8 @@ class BacktestDCA:
             sell_fraction=self.config.auto_sell_fraction['minor']
         )
 
-        portfolio_sell = sell_portfolio(
-            cash_spent=self.state.cash_spent,
-            portfolio=self.state.portfolio,
-            threshold=self.config.threshold_portfolio_sell,
-            sell_fraction=self.config.auto_sell_fraction['major']
-        )
-
         # --- agresive choise ---
-        signals = sorted([portfolio_sell, ma200_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
+        signals = sorted([ma200_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
         cooldown_dict = {

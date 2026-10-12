@@ -25,20 +25,6 @@ def sell_ma200(prices: pd.Series,
     return 0.0, "Wait"
 
 
-def sell_portfolio(cash_spent: float,
-                   portfolio: float,
-                   threshold: float = 2.0,
-                   sell_fraction: float = 0.5) -> tuple[float, str]:
-    """
-    Продає частину портфелю, якщо портфель виходить за верхню межу.
-    """
-    overvalue = portfolio > threshold * cash_spent
-
-    if overvalue:
-        return sell_fraction, f"Portfolio: {portfolio:.0f} [-{sell_fraction:.0%}]"
-    return 0.0, "Wait"
-
-
 def sell_bolinger(prices: pd.Series,
                     threshold: float = 2.0,
                     sell_fraction: float = 0.25) -> tuple[float, str]:

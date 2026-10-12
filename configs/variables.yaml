@@ -28,4 +28,3 @@ default_params:
   threshold_bolinger_sell: 2
   threshold_rsi_sell: 75.0
   threshold_ppo_sell: 10.0
-  threshold_portfolio_sell: 2.0
