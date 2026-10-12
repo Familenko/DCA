@@ -203,6 +203,7 @@ class BacktestDCA:
         # --- manual sell ---
         if self.config.manual_sell_fraction:
             sell_fraction = self.config.manual_sell_fraction
+            self.cooldown = self.config.cooldown_long
             return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
 
         # --- major sell ---
@@ -235,18 +236,27 @@ class BacktestDCA:
         signals = sorted([ma200_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
         sell_fraction, sell_msg = signals[-1]
 
+        cooldown_dict = {
+            self.config.auto_sell_fraction['major']: self.config.cooldown_long,
+            self.config.auto_sell_fraction['minor']: self.config.cooldown_short
+        }
+        self.cooldown = cooldown_dict.get(sell_fraction, self.config.cooldown_long)
+
         return sell_fraction, sell_msg
+
+    def update_decision_restrictions(self):
+        if self.cooldown > 0:
+            self.cooldown -= 1
+
+        if self.embargo > 0:
+            self.embargo -= 1
 
     def run(self):
         for date, price in self.config.prices.items():
             self.state.date = date
             self.state.price = price
 
-            if self.cooldown > 0:
-                self.cooldown -= 1
-
-            if self.embargo > 0:
-                self.embargo -= 1
+            self.update_decision_restrictions()
 
             # --- DCA buy ---
             if self.decide_buy_time(date=date):
@@ -257,19 +267,10 @@ class BacktestDCA:
 
             # --- decide and execute sell ---
             if self.decide_sell_time():
-
-                self.cooldown = self.config.cooldown_long
-
                 sell_fraction, sell_msg = self.decide_sell_amount(date=date)
                 if sell_fraction > 0:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
-                    
-                    # --- cooldown short ---
-                    small_sell = self.config.auto_sell_fraction["minor"] == sell_fraction
-                    auto_sell_flag = not self.config.manual_sell_fraction
-                    if small_sell and auto_sell_flag:
-                        self.cooldown = self.config.cooldown_short
 
             # --- record history ---
             self.state.update_history()
