@@ -20,7 +20,7 @@ default_params:
     minor: 0.1
     major: 0.5
 
-  enable_sell: true
+  classic_dca: false
 
   threshold_ma200_sell: 2.0
   threshold_bolinger_sell: 2

@@ -81,7 +81,7 @@ class Configuration:
     buy_embargo: int
     manual_sell_fraction: float | None
     auto_sell_fraction: dict
-    enable_sell: bool
+    classic_dca: bool
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
     threshold_rsi_sell: float
@@ -145,7 +145,7 @@ class BacktestDCA:
     def decide_buy_time(self, date: pd.Timestamp):
         date_for_buy = date in self.config.buy_dates
         embargo_passed = self.embargo == 0
-        
+
         if date_for_buy and embargo_passed:
             return True
 
@@ -157,7 +157,8 @@ class BacktestDCA:
         trigger_msg = ""
         buy_amount = self.config.buy_amount * (1 - self.config.fee)
         below_portfolio = last_price < self.state.average_price * 0.5
-        if below_portfolio:
+        classic_dca = self.config.classic_dca
+        if below_portfolio and not classic_dca:
             buy_amount = buy_amount * 10
             nominal_amount = self.config.buy_amount * 10
             trigger_msg = f"Buy: {nominal_amount:.2f}$"
@@ -185,7 +186,7 @@ class BacktestDCA:
         have_liquidity = self.state.portfolio_qty > 0
         upper_limit = self.state.portfolio > self.config.warmup_invest
         profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
-        enable_sell = self.config.enable_sell
+        enable_sell = not self.config.classic_dca
 
         if cooldown_passed and have_liquidity and upper_limit and profit_sell and enable_sell:
             return True
