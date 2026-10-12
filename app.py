@@ -123,7 +123,7 @@ class BacktestDCA:
 
         # --- initialize indicators ---
         self.cooldown = self.config.cooldown_long
-        self.embargo = self.config.buy_embargo
+        self.embargo = 0
 
     def buy(self, date: float, buy_amount: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
