@@ -23,5 +23,5 @@ crypto_freq = "W-MON"
 STOCKS = {
     'SPY': {"tickers": "SPY", "start_date": START_DATE, "end_date": TODAY}
 }
-stock_buy_amount = 300
-stock_freq = "WOM-1MON"
+stock_buy_amount = 80
+stock_freq = "W-MON"
