@@ -258,7 +258,10 @@ class BacktestDCA:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     
-                    if sell_fraction == self.config.auto_sell_fraction['minor']:
+                    # --- cooldown short ---
+                    small_sell = self.config.auto_sell_fraction["minor"] == sell_fraction
+                    auto_sell_flag = not self.config.manual_sell_fraction
+                    if small_sell and auto_sell_flag:
                         self.cooldown = self.config.cooldown_short
 
             # --- record history ---
