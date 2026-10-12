@@ -13,8 +13,8 @@ default_params:
   cooldown_long: 60
   cooldown_short: 14
 
-  sell_fraction:
-    manual: null
+  manual_sell_fraction: null
+  auto_sell_fraction:
     minor: 0.1
     major: 0.5
 

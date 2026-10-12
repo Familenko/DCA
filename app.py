@@ -78,7 +78,8 @@ class Configuration:
     minimum_profit: float
     cooldown_short: int
     cooldown_long: int
-    sell_fraction: dict
+    manual_sell_fraction: float | None
+    auto_sell_fraction: dict
     enable_sell: bool
     enable_buy: bool
     threshold_ma200_sell: float
@@ -196,34 +197,34 @@ class BacktestDCA:
 
     def decide_sell_amount(self, date: pd.Timestamp):
         # --- manual sell ---
-        if self.config.sell_fraction['manual']:
-            sell_fraction = self.config.sell_fraction['manual']
-            return sell_fraction, f"Fixed: {self.config.sell_fraction['manual'] * 100:.0f}%"
+        if self.config.manual_sell_fraction:
+            sell_fraction = self.config.manual_sell_fraction
+            return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
 
         # --- major sell ---
         ma200_sell = sell_ma200(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_ma200_sell,
-            sell_fraction=self.config.sell_fraction['major']
+            sell_fraction=self.config.auto_sell_fraction['major']
             )
 
         ppo_sell = sell_ppo(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_ppo_sell,
-            sell_fraction=self.config.sell_fraction['major']
+            sell_fraction=self.config.auto_sell_fraction['major']
         )
 
         # --- minor sell ---
         bolinger_sell = sell_bolinger(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_bolinger_sell,
-            sell_fraction=self.config.sell_fraction['minor']
+            sell_fraction=self.config.auto_sell_fraction['minor']
         )
 
         rsi_sell = sell_rsi(
             prices=self.config.prices.loc[:date],
             threshold=self.config.threshold_rsi_sell,
-            sell_fraction=self.config.sell_fraction['minor']
+            sell_fraction=self.config.auto_sell_fraction['minor']
         )
 
         # --- agresive choise ---
@@ -257,7 +258,7 @@ class BacktestDCA:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
                     
-                    if sell_fraction == self.config.sell_fraction['minor']:
+                    if sell_fraction == self.config.auto_sell_fraction['minor']:
                         self.cooldown = self.config.cooldown_short
 
             # --- record history ---
