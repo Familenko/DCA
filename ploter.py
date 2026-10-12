@@ -224,9 +224,9 @@ def title_with_metrics(ax_price, metrics, last_sale_text):
 def ploter(metrics, history, return_fig: bool = False):
     fig, (ax_price, ax_bottom) = plt.subplots(
         nrows=2, ncols=1,
-        figsize=(16, 10),
+        figsize=(14, 10),
         sharex=True,
-        gridspec_kw={"height_ratios": [3, 1]},
+        gridspec_kw={"height_ratios": [2, 1]},
     )
 
     plot_price(ax_price, history)
@@ -240,6 +240,7 @@ def ploter(metrics, history, return_fig: bool = False):
 
     # --- settings ---
     ax_price.set_ylabel("Asset price ($)")
+    ax_price.grid(True, linestyle="--", alpha=0.5)
     ax_bottom.set_ylabel("Portfolio / Invested ($)")
     ax_bottom.set_xlabel("Date")
     ax_bottom.grid(True, linestyle="--", alpha=0.5)
