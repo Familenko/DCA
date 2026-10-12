@@ -21,7 +21,6 @@ default_params:
     major: 0.5
 
   enable_sell: true
-  enable_buy: true
 
   threshold_ma200_sell: 2.0
   threshold_bolinger_sell: 2

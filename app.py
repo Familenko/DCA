@@ -82,7 +82,6 @@ class Configuration:
     manual_sell_fraction: float | None
     auto_sell_fraction: dict
     enable_sell: bool
-    enable_buy: bool
     threshold_ma200_sell: float
     threshold_bolinger_sell: float
     threshold_rsi_sell: float
@@ -144,15 +143,10 @@ class BacktestDCA:
         self.state.cash_spent += buy_amount
 
     def decide_buy_time(self, date: pd.Timestamp):
-        last_price = self.config.prices.loc[:date].iloc[-1]
-
-        ma = self.config.prices.loc[:date].iloc[-200:].mean()
-        below_ma = last_price < ma
-        not_enough_data = len(self.config.prices.loc[:date]) < 200
-        enable_buy = self.config.enable_buy
         date_for_buy = date in self.config.buy_dates
         embargo_passed = self.embargo == 0
-        if (below_ma or not_enough_data or enable_buy) and date_for_buy and embargo_passed:
+        
+        if date_for_buy and embargo_passed:
             return True
 
         return False   
@@ -187,14 +181,13 @@ class BacktestDCA:
         self.state.realized_cash += sell_returns
 
     def decide_sell_time(self):
-        enaugh_waited = self.cooldown == 0
+        cooldown_passed = self.cooldown == 0
         have_liquidity = self.state.portfolio_qty > 0
-        profit_threshold = self.config.minimum_profit
         upper_limit = self.state.portfolio > self.config.warmup_invest
-        profit_sell = self.state.portfolio > profit_threshold * self.state.cost_basis
+        profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
         enable_sell = self.config.enable_sell
 
-        if enaugh_waited and have_liquidity and upper_limit and profit_sell and enable_sell:
+        if cooldown_passed and have_liquidity and upper_limit and profit_sell and enable_sell:
             return True
             
         return False
