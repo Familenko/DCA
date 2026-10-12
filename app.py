@@ -249,12 +249,16 @@ class BacktestDCA:
 
             # --- decide and execute sell ---
             if self.decide_sell_time():
+
                 self.cooldown = self.config.cooldown_long
+
                 sell_fraction, sell_msg = self.decide_sell_amount(date=date)
                 if sell_fraction > 0:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
-                    self.cooldown = self.config.cooldown_short
+                    
+                    if sell_fraction == self.config.sell_fraction['minor']:
+                        self.cooldown = self.config.cooldown_short
 
             # --- record history ---
             self.state.update_history()

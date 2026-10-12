@@ -34,7 +34,7 @@ def sell_bolinger(prices: pd.Series,
     Продає частину портфелю, якщо ціна виходить за верхню межу Болінджера.
     """
 
-    bb = ta.volatility.BollingerBands(close=prices, window=k, window_dev=threshold)
+    bb = ta.volatility.BollingerBands(close=prices, window_dev=threshold)
 
     last_price = prices.iloc[-1]
     last_upper = bb.bollinger_hband().iloc[-1]
