@@ -221,7 +221,7 @@ def ploter(metrics, history, return_fig: bool = False):
     plot_take_profit(ax_price, history)
 
     plot_value(ax_bottom, history)
-    plot_baseline(ax_bottom, history)
+    # plot_baseline(ax_bottom, history)
 
     last_sale_text = last_sale_info(history)
     title_with_metrics(metrics, last_sale_text)

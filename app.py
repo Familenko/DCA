@@ -20,7 +20,6 @@ class State:
     date: pd.Timestamp = None
     price: float = 0.0
     portfolio_qty: float = 0.0
-    baseline_qty: float = 0.0
     cost_basis: float = 0.0
     cash_spent: float = 0.0
     profit: float = 0.0
@@ -33,10 +32,6 @@ class State:
     def portfolio(self) -> float:
         return self.price * self.portfolio_qty
 
-    @property
-    def baseline(self) -> float:
-        return self.price * self.baseline_qty
-    
     @property
     def average_price(self) -> float:
         return self.cost_basis / self.portfolio_qty if self.portfolio_qty > 0 else np.nan
@@ -54,7 +49,6 @@ class State:
         self.history[self.date] = {
             "Price": self.price,
             "Portfolio_qty": self.portfolio_qty,
-            "Baseline_qty": self.baseline_qty,
             "Cost_basis": self.cost_basis,
             "Cash_spent": self.cash_spent,
             "Profit": self.profit,
@@ -62,7 +56,6 @@ class State:
             "Realized_cash": self.realized_cash,
             "Trigger_msg": self.trigger_msg,
             "Portfolio": self.portfolio,
-            "Baseline": self.baseline,
             "Average_price": self.average_price,
             "Value": self.value
         }
@@ -136,7 +129,6 @@ class BacktestDCA:
         buy_qty = buy_amount / last_price
 
         self.state.portfolio_qty += buy_qty
-        self.state.baseline_qty += buy_qty
         self.state.cost_basis += buy_amount
 
         # metric only for buy
