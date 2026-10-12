@@ -7,7 +7,7 @@ import yaml
 
 from utils.mdd import max_drawdown
 from utils.survival_ma200 import survival_ma200
-from sell_decision.analitic_decision import sell_ma200, sell_bolinger, sell_rsi, sell_ppo
+from utils.sell_decision import sell_ma200, sell_bolinger, sell_rsi, sell_ppo
 from utils.validation import validation
 
 
