@@ -105,6 +105,7 @@ def plot_cash_spent(ax_bottom, history):
         color="green",
         linestyle="--",
         linewidth=1.0,
+        alpha=0.5,
         label="Invested capital ($)",
     )
 
@@ -116,6 +117,7 @@ def plot_invested(ax_bottom, history):
         color="red",
         linestyle="--",
         linewidth=1.0,
+        alpha=0.5,
         label="Nominal portfolio ($)",
     )
 
