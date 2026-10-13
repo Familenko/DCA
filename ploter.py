@@ -220,7 +220,8 @@ def last_sale_info(history):
         last_sale_text = (
             f"Last sell: {last_trigger_date.strftime('%Y-%m-%d')} | "
             f"Profit: {int(last_trigger_row['Profit'])}\\$ | "
-            f"Return: {int(last_trigger_row['Returns'])}\\$"
+            f"Return: {int(last_trigger_row['Returns'])}\\$ | "
+            f"Price: {int(last_trigger_row['Price'])}\\$"
         )
     else:
         last_sale_text = "Last sell: None"
