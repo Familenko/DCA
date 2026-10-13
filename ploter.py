@@ -73,7 +73,6 @@ def plot_value(ax_bottom, history):
         history.index,
         history["Total_value"],
         color="green",
-        label="Total value ($)",
         linewidth=0.5,
         alpha=0.5,
     )
@@ -87,7 +86,7 @@ def plot_portfolio(ax_bottom, history):
         history["Portfolio"],
         color="red",
         alpha=0.05,
-        label="Portfolio ($)",
+        label="Actual portfolio ($)",
         step="mid",
     )
     ax_bottom.plot(
@@ -99,23 +98,25 @@ def plot_portfolio(ax_bottom, history):
     )
 
 
-def plot_invested(ax_bottom, history):
-    # Invested capital (0 → Cost_basis)
-    ax_bottom.fill_between(
+def plot_cash_spent(ax_bottom, history):
+    ax_bottom.plot(
         history.index,
-        0,
-        history["Cost_basis"],
-        color="blue",
-        alpha=0.05,
+        history["Cash_spent"],
+        color="green",
+        linestyle="--",
+        linewidth=1.0,
         label="Invested capital ($)",
-        step="mid",
     )
+
+
+def plot_invested(ax_bottom, history):
     ax_bottom.plot(
         history.index,
         history["Cost_basis"],
-        color="blue",
-        linewidth=0.5,
-        alpha=0.5,
+        color="red",
+        linestyle="--",
+        linewidth=1.0,
+        label="Nominal portfolio ($)",
     )
 
 
@@ -230,7 +231,7 @@ def last_sale_info(history):
 def title_with_metrics(ax_price, metrics, last_sale_text):
     title = (
         f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Total_value: {metrics['Total_value']}\\$"
-        f"\n Portfolio: {metrics['Portfolio']}\\$ | Realized_cash: {metrics['Realized_cash']}\\$"
+        f"\n Portfolio: {metrics['Portfolio']}\\$ | Invested: {metrics['Invested']}\\$ | Realized_cash: {metrics['Realized_cash']}\\$"
         f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d | RoAC: {metrics['RoAC']}%"
         f"\n {last_sale_text}"
     )
@@ -259,6 +260,7 @@ def ploter(metrics, history, return_fig: bool = False):
     plot_portfolio(ax_bottom, history)
     plot_invested(ax_bottom, history)
     plot_value(ax_bottom, history)
+    plot_cash_spent(ax_bottom, history)
 
     # --- settings ---
     ax_price.set_ylabel("Asset price ($)")
