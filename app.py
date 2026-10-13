@@ -123,7 +123,7 @@ class BacktestDCA:
         self.history = None
 
         # --- initialize indicators ---
-        self.cooldown = self.config.cooldown_long
+        self.cooldown = 0
         self.embargo = 0
 
     def buy(self, date: float, buy_amount: float):
@@ -284,9 +284,9 @@ class BacktestDCA:
         num_take_profits = int((self.history["Trigger_msg"] != "").sum())
         mdd_pct, mdd_usd = max_drawdown(portfolio_value=self.history["Portfolio"],
                                          realized_returns=np.cumsum(self.history["Returns"]))
-        roac = return_on_avg_capital(total_value=total_value,
-                                     cash_spent=cash_spent,
-                                     avg_capital=self.history["Cost_basis"].mean())
+        roac = return_on_avg_capital(total_value=self.history["Total_value"],
+                                     cash_spent=self.history["Cash_spent"],
+                                     cost_basis=self.history["Cost_basis"])
 
         return {
             "Target": self.config.target,
