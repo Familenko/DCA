@@ -59,32 +59,63 @@ def plot_price(ax_price, history):
 
 
 def plot_value(ax_bottom, history):
+    # Realized cash = Total_value - Portfolio (area between the two)
+    ax_bottom.fill_between(
+        history.index,
+        history["Portfolio"],
+        history["Total_value"],
+        color="green",
+        alpha=0.05,
+        label="Realized cash ($)",
+        step="mid",
+    )
     ax_bottom.plot(
         history.index,
         history["Total_value"],
         color="green",
         label="Total value ($)",
-        alpha=0.25,
-    )
-
-
-def plot_portfolio(portfolio_invested, history):
-    portfolio_invested.plot(
-        history.index,
-        history["Portfolio"],
-        label="Portfolio ($)",
+        linewidth=0.5,
         alpha=0.5,
     )
 
 
-def plot_invested(portfolio_invested, history):
-    invested_plot = history["Cost_basis"].resample("ME").last()
-    portfolio_invested.bar(
-        invested_plot.index,
-        invested_plot.values,
-        width=20,
-        alpha=0.1,
+def plot_portfolio(ax_bottom, history):
+    # Money still in open position (0 → Portfolio)
+    ax_bottom.fill_between(
+        history.index,
+        0,
+        history["Portfolio"],
+        color="red",
+        alpha=0.05,
+        label="Portfolio ($)",
+        step="mid",
+    )
+    ax_bottom.plot(
+        history.index,
+        history["Portfolio"],
+        color="red",
+        linewidth=0.5,
+        alpha=0.5,
+    )
+
+
+def plot_invested(ax_bottom, history):
+    # Invested capital (0 → Cost_basis)
+    ax_bottom.fill_between(
+        history.index,
+        0,
+        history["Cost_basis"],
+        color="blue",
+        alpha=0.05,
         label="Invested capital ($)",
+        step="mid",
+    )
+    ax_bottom.plot(
+        history.index,
+        history["Cost_basis"],
+        color="blue",
+        linewidth=0.5,
+        alpha=0.5,
     )
 
 
