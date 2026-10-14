@@ -13,13 +13,13 @@ DEFAULT_SEARCH_SPACE = {
 }
 
 
-def _bootstrap_score(prices, strategy, metric, n_boot, sample_size, sequence_length):
+def _bootstrap_score(prices, strategy, n_boot, sample_size, sequence_length):
     stocks = list(prices.columns)
-    scores = []
+    boots = []
 
     for _ in range(n_boot):
         sampled = random.choices(stocks, k=sample_size)
-        total = 0
+        totals = None
         valid = 0
 
         for stock in sampled:
@@ -33,13 +33,24 @@ def _bootstrap_score(prices, strategy, metric, n_boot, sample_size, sequence_len
                 continue
 
             _, m = BacktestDCA(stock, window, strategy=strategy).run()
-            total += m[metric]
+            m = {k: v for k, v in m.items() if k != "Target"}
+
+            if totals is None:
+                totals = {k: 0 for k in m}
+            for k in totals:
+                totals[k] += m[k]
             valid += 1
 
         if valid:
-            scores.append(total / valid)
+            boots.append({k: totals[k] / valid for k in totals})
 
-    return sum(scores) / len(scores) if scores else float("nan")
+    if not boots:
+        return {}
+
+    result = {}
+    for k in boots[0]:
+        result[k] = sum(b[k] for b in boots) / len(boots)
+    return result
 
 
 def grid_search(
@@ -51,16 +62,17 @@ def grid_search(
     sequence_length=365 * 4,
 ):
     param_grid = param_grid or DEFAULT_SEARCH_SPACE
-    
+
     keys = list(param_grid)
     values = [param_grid[k] for k in keys]
     grid = [dict(zip(keys, combo)) for combo in itertools.product(*values)]
 
     rows = []
     for params in tqdm(grid):
-        score = _bootstrap_score(prices, params, metric, n_boot, sample_size, sequence_length)
-        rows.append({**params, metric: score})
+        metrics = _bootstrap_score(prices, params, n_boot, sample_size, sequence_length)
+        rows.append({**params, **metrics})
 
     results = pd.DataFrame(rows).sort_values(metric, ascending=False).reset_index(drop=True)
-    best = results.drop(columns=metric).iloc[0].to_dict()
+    best = {k: results.iloc[0][k] for k in keys}
+    
     return results, best
