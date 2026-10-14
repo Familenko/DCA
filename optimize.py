@@ -51,8 +51,10 @@ def grid_search(
     sequence_length=365 * 4,
 ):
     param_grid = param_grid or DEFAULT_SEARCH_SPACE
+    
     keys = list(param_grid)
-    grid = [dict(zip(keys, c)) for c in itertools.product(*[param_grid[k] for k in keys])]
+    values = [param_grid[k] for k in keys]
+    grid = [dict(zip(keys, combo)) for combo in itertools.product(*values)]
 
     rows = []
     for params in tqdm(grid):
