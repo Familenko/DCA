@@ -19,7 +19,7 @@ def _bootstrap_score(prices, strategy, n_iterations, sample_size, sequence_lengt
                 continue
 
             start = random.randint(0, len(series) - sequence_length)
-            window = series.iloc[start:start + sequence_length].iloc[200:]
+            window = series.iloc[start:start + sequence_length]
             if window.empty:
                 continue
 

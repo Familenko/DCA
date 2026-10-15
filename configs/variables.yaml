@@ -10,12 +10,12 @@ default_params:
   freq: "W-MON"
   fee: 0.01
 
-  minimum_profit: 1.1
+  minimum_profit: 1.5
   minimum_loss: 0.5
 
   buy_embargo: 30
-  cooldown_long: 60
-  cooldown_short: 14
+  cooldown_long: 30
+  cooldown_short: 7
 
   classic_dca: false
   manual_sell_fraction: null
