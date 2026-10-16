@@ -14,4 +14,4 @@ def return_on_avg_capital(total_value, cash_spent, cost_basis):
     profit = total_value - cash_spent
     profit = profit / cost_basis * 100
 
-    return int(profit.median())
+    return int(profit.mean())

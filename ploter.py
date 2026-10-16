@@ -249,7 +249,7 @@ def title_with_metrics(ax_price, metrics, last_sale_text):
 def ploter(metrics, history, return_fig: bool = False):
     fig, (ax_price, ax_bottom) = plt.subplots(
         nrows=2, ncols=1,
-        figsize=(14, 10),
+        figsize=(16, 10),
         sharex=True,
         gridspec_kw={"height_ratios": [2, 1]},
     )
