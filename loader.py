@@ -70,16 +70,16 @@ def loader(tickers, fields=("Close", "Volume")):
 
 if __name__ == "__main__":
     tickers = {
-        "BTC": {"tickers": "BTC-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "ETH": {"tickers": "ETH-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "SOL": {"tickers": "SOL-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "XRP": {"tickers": "XRP-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "DOGE": {"tickers": "DOGE-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "ADA": {"tickers": "ADA-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "DOT": {"tickers": "DOT-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "LINK": {"tickers": "LINK-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "XLM": {"tickers": "XLM-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
-        "XMR": {"tickers": "XMR-USD", "start_date": "2020-01-01", "end_date": "2026-10-25"},
+        "BTC": {"tickers": "BTC-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "ETH": {"tickers": "ETH-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "SOL": {"tickers": "SOL-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "XRP": {"tickers": "XRP-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "DOGE": {"tickers": "DOGE-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "ADA": {"tickers": "ADA-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "DOT": {"tickers": "DOT-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "LINK": {"tickers": "LINK-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "XLM": {"tickers": "XLM-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
+        "XMR": {"tickers": "XMR-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
     }
     dfs = loader(tickers)
     close = dfs["Close"]
