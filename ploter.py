@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from prophet import Prophet
+from utils.mdd import mdd_period
 
 
 def detect_top_changepoints(prices, changepoint_n=3):
@@ -107,6 +108,23 @@ def plot_cash_spent(ax_bottom, history):
         linewidth=1.0,
         alpha=0.5,
         label="Invested capital ($)",
+    )
+
+
+def plot_mdd(ax_bottom, history):
+    peak_idx, trough_idx = mdd_period(history["Total_value"])
+    if peak_idx is None:
+        return
+
+    segment = history["Total_value"].iloc[peak_idx : trough_idx + 1]
+    ax_bottom.plot(
+        segment.index,
+        segment.values,
+        color="red",
+        linewidth=2.0,
+        alpha=0.9,
+        zorder=5,
+        label="MDD period",
     )
 
 
@@ -235,7 +253,7 @@ def title_with_metrics(ax_price, metrics, last_sale_text):
     title = (
         f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Total_value: {metrics['Total_value']}\\$"
         f"\n Portfolio: {metrics['Portfolio']}\\$ | Invested: {metrics['Invested']}\\$ | Realized_cash: {metrics['Realized_cash']}\\$"
-        f"\n MDD: {metrics['MDD']}% ({metrics['MDD_usd']}$) | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d | RoAC: {metrics['RoAC']}%"
+        f"\n MDD: {metrics['MDD']}$ | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d | RoAC: {metrics['RoAC']}%"
         f"\n {last_sale_text}"
     )
     ax_price.text(
@@ -264,6 +282,7 @@ def ploter(metrics, history, return_fig: bool = False):
     plot_invested(ax_bottom, history)
     plot_value(ax_bottom, history)
     plot_cash_spent(ax_bottom, history)
+    plot_mdd(ax_bottom, history)
 
     # --- settings ---
     ax_price.set_ylabel("Asset price ($)")

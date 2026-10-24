@@ -1,30 +1,38 @@
 import numpy as np
 
 
-def max_drawdown(total_value):
+def _dollar_drawdown(total_value) -> tuple[np.ndarray, int | None, int | None]:
     """
-    Calculate the maximum drawdown of a portfolio.
-    Args:
-        total_value (list or np.ndarray): Portfolio + realized cash over time.
-    Returns:
-        tuple: (percent_mdd, dollar_mdd) — percent as int (e.g. -20), dollar loss as int (e.g. -400).
+    Shared dollar-drawdown calc.
+    Returns (dollar_drawdowns, peak_idx, trough_idx).
+    peak/trough are None if empty or no drawdown.
     """
     equity = np.asarray(total_value, dtype=float)
-
     if equity.size == 0:
-        return 0, 0
+        return equity, None, None
 
     peaks = np.maximum.accumulate(equity)
-
     dollar_drawdowns = equity - peaks
-    dollar_mdd = float(dollar_drawdowns.min())
-    dollar_mdd = int(dollar_mdd) if dollar_mdd < 0 else 0
+    if dollar_drawdowns.min() >= 0:
+        return dollar_drawdowns, None, None
 
-    pct_drawdowns = np.zeros_like(equity, dtype=float)
-    valid = peaks != 0
-    pct_drawdowns[valid] = dollar_drawdowns[valid] / peaks[valid]
+    trough_idx = int(np.argmin(dollar_drawdowns))
+    peak_idx = int(np.argmax(equity[: trough_idx + 1]))
+    return dollar_drawdowns, peak_idx, trough_idx
 
-    pct_mdd = float(pct_drawdowns.min())
-    pct_mdd = int(pct_mdd * 100) if pct_mdd < 0 else 0
 
-    return pct_mdd, dollar_mdd
+def mdd_period(total_value) -> tuple[int | None, int | None]:
+    """Indices of the max dollar-drawdown window (peak → trough)."""
+    _, peak_idx, trough_idx = _dollar_drawdown(total_value)
+    return peak_idx, trough_idx
+
+
+def max_drawdown(total_value) -> int:
+    """
+    Maximum dollar drawdown of total_value over time.
+    Returns int dollar loss (e.g. -400), or 0 if none.
+    """
+    dollar_drawdowns, peak_idx, _ = _dollar_drawdown(total_value)
+    if peak_idx is None:
+        return 0
+    return int(dollar_drawdowns.min())

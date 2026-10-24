@@ -283,7 +283,7 @@ class BacktestDCA:
         bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
         avg_price = self.history['Average_price'].iloc[-1]
         num_take_profits = int((self.history["Trigger_msg"] != "").sum())
-        mdd_pct, mdd_usd = max_drawdown(total_value=self.history["Total_value"])
+        mdd_usd = max_drawdown(total_value=self.history["Total_value"])
         roac = return_on_avg_capital(total_value=self.history["Total_value"],
                                      cash_spent=self.history["Cash_spent"],
                                      cost_basis=self.history["Cost_basis"])
@@ -298,8 +298,7 @@ class BacktestDCA:
             "Bull_history": bull_history,
             "Avg_price": avg_price,
             "Num_take_profits": num_take_profits,
-            "MDD": mdd_pct,
-            "MDD_usd": mdd_usd,
+            "MDD": mdd_usd,
             "MA200_survival_days": ma200_survival_days,
             "RoAC": roac,
         }
