@@ -14,7 +14,7 @@ def _bootstrap_score(prices, strategy, n_iterations, sample_size, sequence_lengt
         sampled = random.choices(stocks, k=sample_size)
 
         for stock in sampled:
-            series = prices[stock]
+            series = prices[stock].dropna()
             if len(series) < sequence_length:
                 continue
 
