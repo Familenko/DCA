@@ -74,7 +74,6 @@ if __name__ == "__main__":
         "ETH": {"tickers": "ETH-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
         "SOL": {"tickers": "SOL-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
         "XRP": {"tickers": "XRP-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
-        "DOGE": {"tickers": "DOGE-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
         "ADA": {"tickers": "ADA-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
         "DOT": {"tickers": "DOT-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
         "LINK": {"tickers": "LINK-USD", "start_date": "2012-01-01", "end_date": "2026-10-25"},
