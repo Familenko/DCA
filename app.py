@@ -181,10 +181,10 @@ class BacktestDCA:
         self.cooldown = self.config.cooldown_short
         return False
 
-    def decide_sell_amount(self, date: pd.Timestamp):
+    def decide_sell_amount(self):
         sell_fraction = self.config.sell_fraction
-        return sell_fraction, f"Sell: {self.config.sell_fraction * 100:.0f}%"
-
+        trigger_msg = f"Sell: {self.config.sell_fraction * 100:.0f}%"
+        return sell_fraction, trigger_msg
 
     def update_decision_restrictions(self):
         if self.cooldown > 0:
@@ -209,7 +209,7 @@ class BacktestDCA:
 
             # --- decide and execute sell ---
             if self.decide_sell_time():
-                sell_fraction, sell_msg = self.decide_sell_amount(date=date)
+                sell_fraction, sell_msg = self.decide_sell_amount()
                 if sell_fraction > 0:
                     self.sell(date=date, sell_fraction=sell_fraction)
                     self.state.trigger_msg = sell_msg
