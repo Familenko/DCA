@@ -66,7 +66,6 @@ class Configuration:
     target: str
     prices: pd.Series
     buy_amount: float
-    extra_buy_amount: float
     freq: str
     fee: float
     minimum_profit: float
@@ -75,7 +74,6 @@ class Configuration:
     cooldown_long: int
     buy_embargo: int
     sell_fraction: float
-    classic_dca: bool
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -85,7 +83,7 @@ class Configuration:
         freq_multiplier = VARIABLES["freq_multiplier"]
         multiplier_freq = freq_multiplier[self.freq]
         return int(self.buy_amount * multiplier_freq)
-    
+
     @cached_property
     def buy_dates(self):
         return set(self.prices.resample(self.freq).first().dropna().index)
@@ -146,10 +144,9 @@ class BacktestDCA:
         trigger_msg = ""
         buy_amount = self.config.buy_amount * (1 - self.config.fee)
         below_portfolio = last_price < self.state.average_price * self.config.minimum_loss
-        classic_dca = self.config.classic_dca
-        if below_portfolio and not classic_dca:
-            buy_amount = self.config.extra_buy_amount * (1 - self.config.fee)
-            trigger_msg = f"Buy: {self.config.extra_buy_amount:.0f}$"
+        if below_portfolio:
+            buy_amount = self.config.warmup_invest * (1 - self.config.fee)
+            trigger_msg = f"Buy: {self.config.warmup_invest:.0f}$"
             self.embargo = self.config.buy_embargo
 
         return buy_amount, trigger_msg
@@ -176,9 +173,8 @@ class BacktestDCA:
         have_liquidity = self.state.portfolio_qty > 0
         upper_limit = self.state.portfolio > self.config.warmup_invest
         profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
-        enable_sell = not self.config.classic_dca
 
-        if have_liquidity and upper_limit and profit_sell and enable_sell:
+        if have_liquidity and upper_limit and profit_sell:
             self.cooldown = self.config.cooldown_long
             return True
             
