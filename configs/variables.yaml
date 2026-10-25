@@ -5,14 +5,11 @@ freq_multiplier:
 
 default_params:
   buy_amount: 10.0
-
   freq: "W-MON"
   fee: 0.01
-
   minimum_profit: 2.0
   minimum_loss: 0.5
   sell_fraction: 0.5
-
   buy_embargo: 180
   cooldown_long: 90
   cooldown_short: 7

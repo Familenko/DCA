@@ -70,10 +70,10 @@ class Configuration:
     fee: float
     minimum_profit: float
     minimum_loss: float
+    sell_fraction: float
+    buy_embargo: int
     cooldown_short: int
     cooldown_long: int
-    buy_embargo: int
-    sell_fraction: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
