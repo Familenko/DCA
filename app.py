@@ -239,8 +239,7 @@ class BacktestDCA:
         num_take_profits = int((self.history["Trigger_msg"] != "").sum())
         mdd_usd = max_drawdown(total_value=self.history["Total_value"])
         roac = return_on_avg_capital(total_value=self.history["Total_value"],
-                                     cash_spent=self.history["Cash_spent"],
-                                     cost_basis=self.history["Cost_basis"])
+                                     cash_spent=self.history["Cash_spent"])
 
         return {
             "Target": self.config.target,
