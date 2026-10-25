@@ -12,4 +12,4 @@ default_params:
   sell_fraction: 0.5
   buy_embargo: 180
   cooldown_long: 90
-  cooldown_short: 7
+  cooldown_short: 30
