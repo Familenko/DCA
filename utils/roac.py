@@ -15,4 +15,4 @@ def return_on_avg_capital(total_value, cash_spent) -> int:
     if not mask.any():
         return 0
     daily_return = (total_value[mask] - cash_spent[mask]) / cash_spent[mask] * 100
-    return int(np.median(daily_return))
+    return int(np.mean(daily_return))
