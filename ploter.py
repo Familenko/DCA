@@ -253,7 +253,7 @@ def title_with_metrics(ax_price, metrics, last_sale_text):
     title = (
         f"<{metrics['Target']}> Cash_spent: {metrics['Cash_spent']}\\$ | Total_value: {metrics['Total_value']}\\$"
         f"\n Portfolio: {metrics['Portfolio']}\\$ | Invested: {metrics['Invested']}\\$ | Realized_cash: {metrics['Realized_cash']}\\$"
-        f"\n MDD: {metrics['MDD']}$ | Bull %: {metrics['Bull_history']}% | Survival: {metrics['MA200_survival_days']:.0f}d | RoAC: {metrics['RoAC']}%"
+        f"\n MDD: {metrics['MDD']}$ | Bull %: {metrics['Bull_history']}% | Survival: {metrics['Survival']:.0f}d | RoAC: {metrics['RoAC']}%"
         f"\n {last_sale_text}"
     )
     ax_price.text(

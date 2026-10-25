@@ -34,7 +34,7 @@ def _extract_runs(states: pd.Series) -> list[RegimeRun]:
     return runs
 
 
-def survival_ma200(prices: pd.Series, ma_window: int = 200) -> float:
+def survival(prices: pd.Series, ma_window: int = 200) -> float:
     """
     Оцінює, скільки ще днів ціна залишатиметься у поточному режимі відносно MA.
 

@@ -6,7 +6,7 @@ from functools import cached_property
 import yaml
 
 from utils.mdd import max_drawdown
-from utils.survival_ma200 import survival_ma200
+from utils.survival import survival
 from utils.roac import return_on_avg_capital
 from utils.validation import validation
 from utils.bull import bull_history
@@ -234,7 +234,7 @@ class BacktestDCA:
         invested = int(self.history["Cost_basis"].iloc[-1])
         total_value = int(self.history["Total_value"].iloc[-1])
         
-        ma200_survival_days = survival_ma200(prices=self.config.prices)
+        survival_days = survival(prices=self.config.prices)
         mdd_usd = max_drawdown(total_value=self.history["Total_value"])
         bull_days = bull_history(prices=self.history['Price'], average_price=self.history['Average_price'])
         roac = return_on_avg_capital(total_value=self.history["Total_value"], cash_spent=self.history["Cash_spent"])
@@ -248,6 +248,6 @@ class BacktestDCA:
             "Total_value": total_value,
             "Bull_history": bull_days,
             "MDD": mdd_usd,
-            "MA200_survival_days": ma200_survival_days,
+            "Survival": survival_days,
             "RoAC": roac,
         }
