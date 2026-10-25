@@ -9,6 +9,7 @@ from utils.mdd import max_drawdown
 from utils.survival_ma200 import survival_ma200
 from utils.roac import return_on_avg_capital
 from utils.validation import validation
+from utils.bull import bull_history
 
 
 with open("configs/variables.yaml", "r", encoding="utf-8") as f:
@@ -234,12 +235,9 @@ class BacktestDCA:
         total_value = int(self.history["Total_value"].iloc[-1])
         
         ma200_survival_days = survival_ma200(prices=self.config.prices)
-        bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
-        avg_price = self.history['Average_price'].iloc[-1]
-        num_take_profits = int((self.history["Trigger_msg"].str.contains("Sell:")).sum())
         mdd_usd = max_drawdown(total_value=self.history["Total_value"])
-        roac = return_on_avg_capital(total_value=self.history["Total_value"],
-                                     cash_spent=self.history["Cash_spent"])
+        bull_days = bull_history(prices=self.history['Price'], average_price=self.history['Average_price'])
+        roac = return_on_avg_capital(total_value=self.history["Total_value"], cash_spent=self.history["Cash_spent"])
 
         return {
             "Target": self.config.target,
@@ -248,9 +246,7 @@ class BacktestDCA:
             "Portfolio": portfolio,
             "Invested": invested,
             "Total_value": total_value,
-            "Bull_history": bull_history,
-            "Avg_price": avg_price,
-            "Num_take_profits": num_take_profits,
+            "Bull_history": bull_days,
             "MDD": mdd_usd,
             "MA200_survival_days": ma200_survival_days,
             "RoAC": roac,
