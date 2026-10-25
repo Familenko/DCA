@@ -236,7 +236,7 @@ class BacktestDCA:
         ma200_survival_days = survival_ma200(prices=self.config.prices)
         bull_history = int((self.history['Price'] >= self.history['Average_price']).mean() * 100)
         avg_price = self.history['Average_price'].iloc[-1]
-        num_take_profits = int((self.history["Trigger_msg"] != "").sum())
+        num_take_profits = int((self.history["Trigger_msg"].str.contains("Sell:")).sum())
         mdd_usd = max_drawdown(total_value=self.history["Total_value"])
         roac = return_on_avg_capital(total_value=self.history["Total_value"],
                                      cash_spent=self.history["Cash_spent"])
