@@ -8,7 +8,6 @@ import yaml
 from utils.mdd import max_drawdown
 from utils.survival_ma200 import survival_ma200
 from utils.roac import return_on_avg_capital
-from utils.sell_decision import sell_ma200, sell_bolinger, sell_rsi, sell_ppo
 from utils.validation import validation
 
 
@@ -75,13 +74,8 @@ class Configuration:
     cooldown_short: int
     cooldown_long: int
     buy_embargo: int
-    manual_sell_fraction: float | None
-    auto_sell_fraction: dict
+    sell_fraction: float
     classic_dca: bool
-    threshold_ma200_sell: float
-    threshold_bolinger_sell: float
-    threshold_rsi_sell: float
-    threshold_ppo_sell: float
 
     def __post_init__(self):
         validation(self, VARIABLES)
@@ -176,61 +170,25 @@ class BacktestDCA:
         self.state.realized_cash += sell_returns
 
     def decide_sell_time(self):
-        cooldown_passed = self.cooldown == 0
+        if self.cooldown > 0:
+            return False
+
         have_liquidity = self.state.portfolio_qty > 0
         upper_limit = self.state.portfolio > self.config.warmup_invest
         profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
         enable_sell = not self.config.classic_dca
 
-        if cooldown_passed and have_liquidity and upper_limit and profit_sell and enable_sell:
+        if have_liquidity and upper_limit and profit_sell and enable_sell:
+            self.cooldown = self.config.cooldown_long
             return True
             
+        self.cooldown = self.config.cooldown_short
         return False
 
     def decide_sell_amount(self, date: pd.Timestamp):
-        # --- manual sell ---
-        if self.config.manual_sell_fraction:
-            sell_fraction = self.config.manual_sell_fraction
-            self.cooldown = self.config.cooldown_long
-            return sell_fraction, f"Fixed: {self.config.manual_sell_fraction * 100:.0f}%"
+        sell_fraction = self.config.sell_fraction
+        return sell_fraction, f"Fixed: {self.config.sell_fraction * 100:.0f}%"
 
-        # --- major sell ---
-        ma200_sell = sell_ma200(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_ma200_sell,
-            sell_fraction=self.config.auto_sell_fraction['major']
-            )
-
-        ppo_sell = sell_ppo(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_ppo_sell,
-            sell_fraction=self.config.auto_sell_fraction['major']
-        )
-
-        # --- minor sell ---
-        bolinger_sell = sell_bolinger(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_bolinger_sell,
-            sell_fraction=self.config.auto_sell_fraction['minor']
-        )
-
-        rsi_sell = sell_rsi(
-            prices=self.config.prices.loc[:date],
-            threshold=self.config.threshold_rsi_sell,
-            sell_fraction=self.config.auto_sell_fraction['minor']
-        )
-
-        # --- agresive choise ---
-        signals = sorted([ma200_sell, bolinger_sell, rsi_sell, ppo_sell], key=lambda x: x[0])
-        sell_fraction, sell_msg = signals[-1]
-
-        cooldown_dict = {
-            self.config.auto_sell_fraction['major']: self.config.cooldown_long,
-            self.config.auto_sell_fraction['minor']: self.config.cooldown_short
-        }
-        self.cooldown = cooldown_dict.get(sell_fraction, self.config.cooldown_long)
-
-        return sell_fraction, sell_msg
 
     def update_decision_restrictions(self):
         if self.cooldown > 0:
