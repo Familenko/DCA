@@ -183,7 +183,7 @@ class BacktestDCA:
 
     def decide_sell_amount(self, date: pd.Timestamp):
         sell_fraction = self.config.sell_fraction
-        return sell_fraction, f"Fixed: {self.config.sell_fraction * 100:.0f}%"
+        return sell_fraction, f"Sell: {self.config.sell_fraction * 100:.0f}%"
 
 
     def update_decision_restrictions(self):

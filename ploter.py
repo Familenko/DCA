@@ -215,7 +215,7 @@ def plot_take_profit(ax_price, history):
             price = history.loc[dt, "Price"]
 
             if returns > 0:
-                text = f"p={int(profit)} r={int(returns)} {msg}"
+                text = f"{msg} p={int(profit)} r={int(returns)}"
             else:
                 text = msg
             ax_price.annotate(
