@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
+from utils.validation import check_prices
+
 
 class FallenTokenFinder:
     def __init__(
@@ -35,14 +37,11 @@ class FallenTokenFinder:
     def _validate_df(self, prices_df: pd.DataFrame):
         if not isinstance(prices_df, pd.DataFrame):
             raise ValueError("Input must be a pandas DataFrame.")
-        if prices_df.empty:
-            raise ValueError("Input DataFrame is empty.")
-        if not all(isinstance(col, str) for col in prices_df.columns):
-            raise ValueError("All column names must be strings.")
-        if not np.issubdtype(prices_df.index.dtype, np.datetime64):
-            raise ValueError("Index must be of datetime type.")
         if len(prices_df) < self.history_period_days:
             raise ValueError(f"DataFrame must have at least {self.history_period_days} rows.")
+
+        for col in prices_df.columns:
+            check_prices(prices_df[col])
         
         return prices_df
 
