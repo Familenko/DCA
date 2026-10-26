@@ -8,8 +8,12 @@ import yaml
 from utils.mdd import max_drawdown
 from utils.survival import survival
 from utils.roac import return_on_avg_capital
-from utils.validation import validation
 from utils.bull import bull_history
+from utils.validation import (
+    check_prices, check_buy_amount, check_freq, 
+    check_fee, check_cooldown, check_minimum_profit, 
+    check_minimum_loss, check_sell_fraction, check_buy_embargo
+)
 
 
 with open("configs/variables.yaml", "r", encoding="utf-8") as f:
@@ -77,7 +81,15 @@ class Configuration:
     cooldown_long: int
 
     def __post_init__(self):
-        validation(self, VARIABLES)
+        check_prices(self.prices)
+        check_buy_amount(self.buy_amount)
+        check_freq(self.freq, VARIABLES["freq_multiplier"])
+        check_fee(self.fee)
+        check_cooldown(self.cooldown_long, self.cooldown_short)
+        check_minimum_profit(self.minimum_profit)
+        check_minimum_loss(self.minimum_loss)
+        check_sell_fraction(self.sell_fraction)
+        check_buy_embargo(self.buy_embargo)
             
     @property
     def warmup_invest(self) -> float:

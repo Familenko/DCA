@@ -60,15 +60,3 @@ def check_cooldown(cooldown_long: int, cooldown_short: int):
 
     if not (1 <= cooldown_short <= 365):
         raise ValueError("cooldown_short must be between 1 and 365")
-
-
-def validation(self, variables):
-    check_prices(self.prices)
-    check_buy_amount(self.buy_amount)
-    check_freq(self.freq, variables["freq_multiplier"])
-    check_fee(self.fee)
-    check_cooldown(self.cooldown_long, self.cooldown_short)
-    check_minimum_profit(self.minimum_profit)
-    check_minimum_loss(self.minimum_loss)
-    check_sell_fraction(self.sell_fraction)
-    check_buy_embargo(self.buy_embargo)
