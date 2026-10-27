@@ -133,7 +133,6 @@ class BacktestDCA:
 
     def buy(self, date: float, buy_amount: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
-
         buy_qty = buy_amount / last_price
 
         self.state.portfolio_qty += buy_qty
@@ -143,30 +142,32 @@ class BacktestDCA:
         self.state.cash_spent += buy_amount
 
     def decide_buy_time(self, date: pd.Timestamp):
-        date_for_buy = date in self.config.buy_dates
-        embargo_passed = self.embargo == 0
+        if self.embargo > 0:
+            return False
 
-        if date_for_buy and embargo_passed:
+        valid_date = date in self.config.buy_dates
+        if valid_date:
             return True
 
-        return False   
+        return False
 
     def decide_buy_amount(self, date: pd.Timestamp):
         last_price = self.config.prices.loc[:date].iloc[-1]
-
-        trigger_msg = ""
-        buy_amount = self.config.buy_amount * (1 - self.config.fee)
         below_portfolio = last_price < self.state.average_price * self.config.minimum_loss
+
         if below_portfolio:
             buy_amount = self.config.warmup_invest * (1 - self.config.fee)
             trigger_msg = f"Buy: {self.config.warmup_invest:.0f}$"
             self.embargo = self.config.buy_embargo
 
+        else:
+            buy_amount = self.config.buy_amount * (1 - self.config.fee)
+            trigger_msg = ""
+
         return buy_amount, trigger_msg
 
     def sell(self, date: float, sell_fraction: float):
         last_price = self.config.prices.loc[:date].iloc[-1]
-        
         sell_qty = self.state.portfolio_qty * sell_fraction
         sell_basis = self.state.cost_basis * sell_fraction
         sell_returns = sell_qty * last_price * (1 - self.config.fee)
@@ -185,18 +186,25 @@ class BacktestDCA:
 
         have_liquidity = self.state.portfolio_qty > 0
         upper_limit = self.state.portfolio > self.config.warmup_invest
-        profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
 
-        if have_liquidity and upper_limit and profit_sell:
-            self.cooldown = self.config.cooldown_long
+        if have_liquidity and upper_limit:
             return True
             
-        self.cooldown = self.config.cooldown_short
         return False
 
     def decide_sell_amount(self):
-        sell_fraction = self.config.sell_fraction
-        trigger_msg = f"Sell: {self.config.sell_fraction * 100:.0f}%"
+        self.cooldown = self.config.cooldown_long
+
+        profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
+        if profit_sell:
+            sell_fraction = self.config.sell_fraction
+            trigger_msg = f"Sell: {self.config.sell_fraction * 100:.0f}%"
+
+        else:
+            self.cooldown = self.config.cooldown_short
+            sell_fraction = 0
+            trigger_msg = ""
+
         return sell_fraction, trigger_msg
 
     def update_decision_restrictions(self):
