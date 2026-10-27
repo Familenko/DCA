@@ -193,17 +193,17 @@ class BacktestDCA:
         return False
 
     def decide_sell_amount(self):
-        self.cooldown = self.config.cooldown_long
-
         profit_sell = self.state.portfolio > self.config.minimum_profit * self.state.cost_basis
+
         if profit_sell:
             sell_fraction = self.config.sell_fraction
             trigger_msg = f"Sell: {self.config.sell_fraction * 100:.0f}%"
+            self.cooldown = self.config.cooldown_long
 
         else:
-            self.cooldown = self.config.cooldown_short
             sell_fraction = 0
             trigger_msg = ""
+            self.cooldown = self.config.cooldown_short
 
         return sell_fraction, trigger_msg
 
