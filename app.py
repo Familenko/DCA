@@ -186,7 +186,6 @@ class BacktestDCA:
 
         have_liquidity = self.state.portfolio_qty > 0
         upper_limit = self.state.portfolio > self.config.warmup_invest
-
         if have_liquidity and upper_limit:
             return True
             
