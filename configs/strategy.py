@@ -17,8 +17,8 @@ CRYPTO = {
     "AVAX": {"tickers": "AVAX-USD", "start_date": START_DATE, "end_date": TODAY}
 }
 crypto_params={
-    'buy_amount': 10, 
-    'freq': "W-MON"
+    'buy_amount': 40, 
+    'freq': "WOM-1MON"
     }
 
 # stocks
@@ -26,6 +26,6 @@ STOCKS = {
     'SPY': {"tickers": "SPY", "start_date": START_DATE, "end_date": TODAY}
 }
 stocks_params={
-    'buy_amount': 75, 
-    'freq': "W-MON"
+    'buy_amount': 300, 
+    'freq': "WOM-1MON"
     }

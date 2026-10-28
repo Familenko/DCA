@@ -4,8 +4,8 @@ freq_multiplier:
   D: 365
 
 default_params:
-  buy_amount: 10.0
-  freq: "W-MON"
+  buy_amount: 100.0
+  freq: "WOM-1MON"
   fee: 0.01
   minimum_profit: 2.0
   minimum_loss: 0.5
