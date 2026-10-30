@@ -27,12 +27,6 @@ VA_DEFAULTS = {
     "fee": VARIABLES["default_params"]["fee"], 
     "sell_fraction": 1.0
     }
-DCA_DEFAULTS = {
-    "buy_amount": VARIABLES["default_params"]["buy_amount"],
-    "freq": VARIABLES["default_params"]["freq"],
-    "fee": VARIABLES["default_params"]["fee"], 
-    "sell_fraction": 0.0
-    }
 
 
 @dataclass
@@ -210,101 +204,6 @@ class BacktestVA:
                     if sell_fraction > 0:
                         self.sell(date=date, sell_fraction=sell_fraction)
                         self.state.trigger_msg = sell_msg
-
-            # --- record history ---
-            self.state.update_history()
-            self.state.clear_day()
-
-        # --- finalize history and metrics ---
-        self.history = pd.DataFrame.from_dict(self.state.history, orient="index")
-        self.history.index.name = "Date"
-
-        self.metrics = self.calculate_metrics()
-
-        return self.history, self.metrics
-
-    def calculate_metrics(self):
-        cash_spent = int(self.history["Cash_spent"].iloc[-1])
-        portfolio = int(self.history["Portfolio"].iloc[-1])
-        realized_cash = int(self.history["Realized_cash"].iloc[-1])
-        invested = int(self.history["Cost_basis"].iloc[-1])
-        total_value = int(self.history["Total_value"].iloc[-1])
-
-        survival_days = survival(prices=self.config.prices)
-        mdd_usd = max_drawdown(total_value=self.history["Total_value"])
-        bull_days = bull_history(prices=self.history["Price"], average_price=self.history["Average_price"])
-        roac = return_on_avg_capital(total_value=self.history["Total_value"], cash_spent=self.history["Cash_spent"])
-
-        return {
-            "Target": self.config.target,
-            "Cash_spent": cash_spent,
-            "Realized_cash": realized_cash,
-            "Portfolio": portfolio,
-            "Invested": invested,
-            "Total_value": total_value,
-            "Bull_history": bull_days,
-            "MDD": mdd_usd,
-            "Survival": survival_days,
-            "RoAC": roac,
-        }
-
-
-class BacktestPureDCA:
-    def __init__(
-        self,
-        target: str,
-        prices: pd.Series,
-        strategy: dict | None = None
-    ):
-        # --- initialize configuration ---
-        strategy = strategy or {}
-        merged_strategy = {
-            **DCA_DEFAULTS,
-            **{k: v for k, v in strategy.items() if k in STRATEGY_KEYS},
-        }
-
-        self.config = Configuration(
-            target=target,
-            prices=prices,
-            **merged_strategy
-        )
-
-        # --- initialize state ---
-        self.state = State()
-
-        # --- initialize metrics and history ---
-        self.metrics = None
-        self.history = None
-
-    def buy(self, date: float, buy_amount: float):
-        last_price = self.config.prices.loc[:date].iloc[-1]
-        buy_qty = buy_amount / last_price
-
-        self.state.portfolio_qty += buy_qty
-        self.state.cost_basis += buy_amount
-
-        # metric only for buy
-        self.state.cash_spent += buy_amount
-
-    def decide_buy_time(self, date: pd.Timestamp):
-        return date in self.config.buy_dates
-
-    def decide_buy_amount(self, date: pd.Timestamp):
-        buy_amount = self.config.buy_amount * (1 - self.config.fee)
-        trigger_msg = f"Buy: {self.config.buy_amount:.0f}$"
-        return buy_amount, trigger_msg
-
-    def run(self):
-        for date, price in self.config.prices.items():
-            self.state.date = date
-            self.state.price = price
-
-            # --- pure DCA buy ---
-            if self.decide_buy_time(date=date):
-                buy_amount, buy_msg = self.decide_buy_amount(date=date)
-                if buy_amount > 0:
-                    self.buy(date=date, buy_amount=buy_amount)
-                    self.state.trigger_msg = buy_msg
 
             # --- record history ---
             self.state.update_history()
