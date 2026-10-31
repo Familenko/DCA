@@ -185,7 +185,7 @@ def plot_take_profit(ax_price, history):
 
     if len(trigger_dates) > 0:
         buy_trigger = msgs.loc[trigger_dates].str.startswith("Buy")
-        colors = ["red" if is_buy else "green" for is_buy in buy_trigger]
+        colors = ["green" if is_buy else "red" for is_buy in buy_trigger]
 
         # Scale marker sizes based on returns (larger for higher returns)
         sell_values = history.loc[trigger_dates, "Returns"].clip(lower=0).astype(float)

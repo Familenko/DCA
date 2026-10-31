@@ -165,11 +165,11 @@ class BacktestDCA:
         elif len(prices) > 200:
             multiplier = max(0.0, 1.0 - (last_price / ma200 - 1.0))
             buy_amount = self.config.buy_amount * multiplier * (1 - self.config.fee)
-            trigger_msg = ""
+            trigger_msg = f"Buy: {buy_amount:.0f}$"
 
         else:
             buy_amount = self.config.buy_amount * (1 - self.config.fee)
-            trigger_msg = ""
+            trigger_msg = f"Buy: {buy_amount:.0f}$"
 
         return buy_amount, trigger_msg
 
