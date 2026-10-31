@@ -154,11 +154,18 @@ class BacktestDCA:
     def decide_buy_amount(self, date: pd.Timestamp):
         last_price = self.config.prices.loc[:date].iloc[-1]
         below_portfolio = last_price < self.state.average_price * self.config.minimum_loss
+        prices = self.config.prices.loc[:date]
+        ma200 = prices.iloc[-200:].mean()
 
         if below_portfolio:
             buy_amount = self.config.warmup_invest * (1 - self.config.fee)
             trigger_msg = f"Buy: {self.config.warmup_invest:.0f}$"
             self.embargo = self.config.buy_embargo
+
+        elif len(prices) > 200:
+            multiplier = max(0.0, 1.0 - (last_price / ma200 - 1.0))
+            buy_amount = self.config.buy_amount * multiplier * (1 - self.config.fee)
+            trigger_msg = ""
 
         else:
             buy_amount = self.config.buy_amount * (1 - self.config.fee)
